@@ -19,7 +19,111 @@
 </head>
 
 <body>
-    
+    <header class="data-header">
+        <div class="data-header-content">
+            <h1 class="h3 data-header-title">Team members</h1>
+            <p class="data-header-description">Manage your people, roles, and workspace access.</p>
+        </div>
+        <div class="data-header-btn-wrapper">
+            <button class="btn primary-btn add-user-btn" data-modal="add-user">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-plus preview-icon">
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                </svg>
+                <span>Add User</span>
+            </button>
+            <div class="scrollbar-vertical modal" id="add-user">
+                <div class="modal-dialog">
+                    <div class="modal-head-wrapper">
+                        <div class="modal-head">
+                            <h2 class="h4 modal-title">Create new user</h2>
+                            <p class="modal-description">Add a member to your workspace.</p>
+                        </div>
+                        <button class="flex-shrink-0 modal-close modal-close-btn" type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="modal-close-icon lucide lucide-x preview-icon">
+                                <path d="M18 6 6 18"></path>
+                                <path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <form class="add-user-form">
+                        <div class="input-stack">
+                            <label class="input-label" for="add-user-name">Full name
+                                <span class="label-caption">*</span>
+                            </label>
+                            <input class="input-field" type="text" name="add-user-name" id="add-user-name" placeholder="Enter full name" oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')" required>
+                        </div>
+                        <div class="input-stack">
+                            <label class="input-label" for="add-user-email">Email address
+                                <span class="label-caption">*</span>
+                            </label>
+                            <input class="input-field" type="email" name="add-user-email" id="add-user-email" placeholder="name@company.com" required>
+                        </div>
+                        <div class="input-stack column-span-2">
+                            <label class="input-label cursor-auto" for="add-user-department">Department
+                                <span class="label-caption">*</span>
+                            </label>
+                            <select class="input-field" name="add-user-department" id="add-user-department" required>
+                                <option value="" selected disabled>Select department</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="design">Design</option>
+                                <option value="product-management">Product Management</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="sales">Sales</option>
+                                <option value="human-resources">Human Resources (HR)</option>
+                                <option value="finance-&-accounting">Finance & Accounting</option>
+                                <option value="operations">Operations</option>
+                                <option value="customer-support">Customer Support</option>
+                                <option value="it-&-security">IT & Security</option>
+                                <option value="legal">Legal</option>
+                                <option value="administration">Administration</option>
+                                <option value="research-&-development">Research & Development (R&D)</option>
+                            </select>
+                        </div>
+                        <div class="input-stack column-span-2">
+                            <label class="input-label cursor-auto" for="add-user-role">Role
+                                <span class="label-caption">*</span>
+                            </label>
+                            <select class="input-field" name="add-user-role" id="add-user-role" required>
+                                <option value="" selected disabled>Select role</option>
+                                <option value="admin">Admin</option>
+                                <option value="member">Member</option>
+                                <option value="viewer">Viewer</option>
+                                <option value="editor">Editor</option>
+                            </select>
+                        </div>
+                        <div class="input-stack">
+                            <label class="input-label cursor-auto" for="add-user-status">Status
+                                <span class="label-caption">*</span>
+                            </label>
+                            <select class="input-field" name="add-user-status" id="add-user-status" required>
+                                <option value="" selected disabled>Select status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="invited">Invited</option>
+                            </select>
+                        </div>
+                        <div class="input-stack">
+                            <label class="input-label" for="add-user-registration-date">Registration date
+                                <span class="label-caption">*</span>
+                            </label>
+                            <input class="input-field" type="date" name="add-user-registration-date" id="add-user-registration-date" placeholder="Select Registration Date" required="">
+                        </div>
+                        <div class="modal-wrapper-border column-span-2"></div>
+                        <div class="modal-btn-wrapper column-span-2">
+                            <button class="btn secondary-btn modal-close" type="button">Cancel</button>
+                            <button class="btn primary-btn" type="submit">Create user</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="quick-actions-wrapper">
+        <input class="input-field user-search-input" type="text" name="searchbar" id="searchbar" placeholder="Search users...">
+    </section>
 
     <!----- Nice Select js ----->
     <script src="assets/js/jquery.js"></script>
