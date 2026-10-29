@@ -17,7 +17,6 @@ if (modal) {
             modalOpen(id);
         });
     });
-    console.log("modalBtns");
 
 
     modalCloseBtns.forEach((button) => {

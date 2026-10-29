@@ -60,8 +60,9 @@
   left: 0;
   background-color: var(--white);
   border-radius: 8px;
-  border: 1px solid var(--purple-700);
+  border: 1px solid var(--cloud-break-200);
   transform: scale(0);
+  box-shadow: 0 8px 24px 0 var(--black-velvet-0_1);
   transition: all 0.3s ease-in-out;
   z-index: 9;
 }
@@ -81,7 +82,7 @@
 .nice-select .option:hover:not(.disabled),
 .nice-select .option.focus,
 .nice-select .current {
-  color: var(--purple-800);
+  color: var(--black-velvet);
 }
 .nice-select .current {
   overflow: hidden;
