@@ -1,3 +1,6 @@
+// ================================
+// NICE SELECT JS
+// ================================
 $(document).ready(function () {
     $("select").niceSelect();
 });
@@ -47,3 +50,13 @@ if (modal) {
         document.body.classList.remove("body-hidden");
     };
 }
+
+// ================================
+// TOOLBAR ACTION
+// ================================
+toolbarActionStack.document.querySelectorAll(".toolbar-action-stack");
+toolbarActionStack.array.forEach((action) => {
+    action.addEventListener("click") {
+        action.classList.add(".show");
+    };
+});

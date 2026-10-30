@@ -84,15 +84,13 @@ body {
   font-family: var(--font-inter);
   color: var(--black-velvet);
   background-color: var(--purple-300);
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
 }
 @media (max-width: 575px) {
   body {
     font-size: 14px;
   }
 }
+
 .body-hidden {
   overflow: hidden;
 }
@@ -107,6 +105,18 @@ body {
   .container {
     padding-inline: 16px;
   }
+}
+
+.section-spacing {
+  padding-block: 16px;
+}
+
+.section-spacing-top-0 {
+  padding-top: 0;
+}
+
+.section-spacing-bottom-0 {
+  padding-bottom: 0;
 }
 
 .text-secondary {

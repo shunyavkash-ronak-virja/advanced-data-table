@@ -1,3 +1,7 @@
+.header {
+  padding-top: 32px;
+}
+
 .data-header {
   display: flex;
   align-items: center;
