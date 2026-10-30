@@ -130,12 +130,14 @@
   z-index: 2;
   opacity: 0;
   visibility: hidden;
+  transform: scale(0.8);
   transition: all 0.3s ease-in-out;
 }
 
 .toolbar-dropdown-block.show {
   opacity: 1;
   visibility: visible;
+  transform: scale(1);
 }
 
 .toolbar-dropdown-stack {
@@ -146,7 +148,7 @@
   box-shadow: 0 8px 24px 0 var(--black-velvet-0_1);
 }
 
-.filters-dropdown {
+.filters-dropdown .toolbar-dropdown-stack {
   min-width: 345px;
   padding: 16px;
   display: flex;
@@ -154,9 +156,12 @@
   gap: 16px;
 }
 
-.sorting-dropdown {
+.sorting-dropdown .toolbar-dropdown-stack {
   min-width: 230px;
   padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .filters-dropdown-title-wrapper {
@@ -207,4 +212,59 @@
 .sorting-option.active::after {
   opacity: 1;
   visibility: visible;
+}
+
+.datatable-outline {
+  border: 1px solid var(--purple-700);
+  border-radius: 14px;
+  margin-top: 16px;
+  overflow: auto;
+}
+
+.datatable {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  background-color: var(--white-100);
+  padding: 20px;
+}
+
+.datatable-shorting-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.datatable-head tr th {
+  text-align: left;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--encore);
+  font-weight: 400;
+  padding: 18px 20px;
+}
+
+.datatable-checkbox {
+  width: 22px;
+  aspect-ratio: 1;
+  appearance: none;
+  display: block;
+  border: 1px solid var(--cloud-break-200);
+  border-radius: 4px;
+  background-color: var(--white);
+  cursor: pointer;
+}
+
+.datatable-shorting-icon {
+  width: 14px;
+  aspect-ratio: 1;
+}
+
+.datatable-body tr {
+  padding: 18px 16px;
+  vertical-align: middle;
+}
+
+.datatable-body tr:not(:last-child) {
+  border-bottom: 1px solid var(--cloud-break-200);
 }

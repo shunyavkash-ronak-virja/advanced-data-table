@@ -137,7 +137,7 @@
                 </div>
                 <div class="toolbar-action-wrapper">
                     <div class="toolbar-action-stack">
-                        <button class="btn secondary-btn action-btn">
+                        <button class="btn secondary-btn action-btn" data-dropdown="filters">
                             <span>Filters</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-sliders-horizontal preview-icon">
                                 <path d="M10 5H3" />
@@ -151,11 +151,11 @@
                                 <path d="M8 12H3" />
                             </svg>
                         </button>
-                        <div class="toolbar-dropdown-block">
-                            <form class="toolbar-dropdown-stack filters-dropdown">
+                        <div class="toolbar-dropdown-block filters-dropdown" data-dropdown-content="filters">
+                            <form class="toolbar-dropdown-stack">
                                 <div class="filters-dropdown-title-wrapper">
                                     <h2 class="h4">Filters</h2>
-                                    <button class="flex-shrink-0 modal-close primary-icon icon-btn" type="button">
+                                    <button class="flex-shrink-0 filters-close primary-icon icon-btn" type="button">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="modal-close-icon lucide lucide-x preview-icon">
                                             <path d="M18 6 6 18"></path>
                                             <path d="m6 6 12 12"></path>
@@ -220,7 +220,7 @@
                         </div>
                     </div>
                     <div class="toolbar-action-stack">
-                        <button class="btn secondary-btn action-btn">
+                        <button class="btn secondary-btn action-btn" data-dropdown="sort">
                             <span>Sort</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-arrow-up-down preview-icon">
                                 <path d="m21 16-4 4-4-4" />
@@ -229,8 +229,8 @@
                                 <path d="M7 4v16" />
                             </svg>
                         </button>
-                        <div class="toolbar-dropdown-block">
-                            <div class="toolbar-dropdown-stack sorting-dropdown">
+                        <div class="toolbar-dropdown-block sorting-dropdown" data-dropdown-content="sort">
+                            <div class="toolbar-dropdown-stack">
                                 <button class="sorting-option active" type="button">Name A–Z</button>
                                 <button class="sorting-option" type="button">Name Z–A</button>
                                 <button class="sorting-option" type="button">Department A–Z</button>
@@ -239,6 +239,35 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="scrollbar-horizontal datatable-outline">
+                <table class="datatable">
+                    <thead class="datatable-head">
+                        <tr>
+                            <th><input type="checkbox" class="datatable-checkbox"></th>
+                            <th>
+                                <div class="datatable-shorting-wrapper">
+                                    <span>User</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="datatable-shorting-icon icon icon-tabler icons-tabler-outline icon-tabler-arrow-down">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M12 5l0 14" />
+                                        <path d="M18 13l-6 6" />
+                                        <path d="M6 13l6 6" />
+                                    </svg>
+                                </div>
+                            </th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="datatable-body">
+                        <tr>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>

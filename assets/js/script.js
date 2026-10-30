@@ -54,3 +54,56 @@ if (modal) {
 // ================================
 // TOOLBAR ACTION
 // ================================
+const actionButtons = document.querySelectorAll(".action-btn");
+const dropdowns = document.querySelectorAll("[data-dropdown-content]");
+
+function closeAllDropdowns() {
+    dropdowns.forEach((dropdown) => {
+        dropdown.classList.remove("show");
+    });
+}
+
+actionButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        const dropdownType = button.dataset.dropdown;
+        const targetDropdown = document.querySelector(`[data-dropdown-content="${dropdownType}"]`);
+
+        if (!targetDropdown) return;
+        const isOpen = targetDropdown.classList.contains("show");
+        closeAllDropdowns();
+
+        if (!isOpen) {
+            targetDropdown.classList.add("show");
+        }
+    });
+});
+
+document.addEventListener("click", (e) => {
+    if (e.target.closest(".filters-close")) {
+        closeAllDropdowns();
+        return;
+    }
+
+    if (e.target.classList.contains("filters-dropdown")) {
+        closeAllDropdowns();
+        return;
+    }
+
+    if (e.target.closest("[data-dropdown-content]")) {
+        return;
+    }
+
+    if (e.target.closest(".action-btn")) {
+        return;
+    }
+
+    closeAllDropdowns();
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        closeAllDropdowns();
+    }
+});
