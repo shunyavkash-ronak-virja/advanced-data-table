@@ -54,9 +54,3 @@ if (modal) {
 // ================================
 // TOOLBAR ACTION
 // ================================
-toolbarActionStack.document.querySelectorAll(".toolbar-action-stack");
-toolbarActionStack.array.forEach((action) => {
-    action.addEventListener("click") {
-        action.classList.add(".show");
-    };
-});
