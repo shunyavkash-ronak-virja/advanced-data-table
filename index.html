@@ -23,12 +23,12 @@
         <div class="container">
             <div class="data-header">
                 <div class="data-header-content">
-                    <h1 class="h3 data-header-title">Team members</h1>
+                    <h1 class="data-header-title">Team members</h1>
                     <p class="text-secondary data-header-description">Manage your people, roles, and workspace access.</p>
                 </div>
                 <div class="data-header-btn-wrapper">
                     <button class="btn primary-btn add-user-btn" data-modal="add-user">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-plus preview-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-plus preview-icon">
                             <path d="M5 12h14" />
                             <path d="M12 5v14" />
                         </svg>
@@ -38,7 +38,7 @@
                         <div class="modal-dialog">
                             <div class="modal-head-wrapper">
                                 <div class="modal-head-content">
-                                    <h2 class="h4 modal-title">Create new user</h2>
+                                    <h2 class="modal-title">Create new user</h2>
                                     <p class="modal-description">Add a member to your workspace.</p>
                                 </div>
                                 <button class="flex-shrink-0 modal-close primary-icon icon-btn" type="button">
@@ -139,7 +139,7 @@
                     <div class="toolbar-action-stack">
                         <button class="btn secondary-btn action-btn" data-dropdown="filters">
                             <span>Filters</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-sliders-horizontal preview-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-sliders-horizontal preview-icon">
                                 <path d="M10 5H3" />
                                 <path d="M12 19H3" />
                                 <path d="M14 3v4" />
@@ -154,7 +154,7 @@
                         <div class="toolbar-dropdown-block filters-dropdown" data-dropdown-content="filters">
                             <form class="toolbar-dropdown-stack">
                                 <div class="filters-dropdown-title-wrapper">
-                                    <h2 class="h4">Filters</h2>
+                                    <h2>Filters</h2>
                                     <button class="flex-shrink-0 filters-close primary-icon icon-btn" type="button">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="modal-close-icon lucide lucide-x preview-icon">
                                             <path d="M18 6 6 18"></path>
@@ -222,7 +222,7 @@
                     <div class="toolbar-action-stack">
                         <button class="btn secondary-btn action-btn" data-dropdown="sort">
                             <span>Sort</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon lucide lucide-arrow-up-down preview-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-arrow-up-down preview-icon">
                                 <path d="m21 16-4 4-4-4" />
                                 <path d="M17 20V4" />
                                 <path d="m3 8 4-4 4 4" />
@@ -240,15 +240,16 @@
                     </div>
                 </div>
             </div>
+
             <div class="scrollbar-horizontal datatable-outline">
                 <table class="datatable">
                     <thead class="datatable-head">
                         <tr>
-                            <th><input type="checkbox" class="datatable-checkbox"></th>
+                            <th><input type="checkbox" class="datatable-checkbox check-all-checkbox"></th>
                             <th>
                                 <div class="datatable-shorting-wrapper">
                                     <span>User</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="datatable-shorting-icon icon icon-tabler icons-tabler-outline icon-tabler-arrow-down">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 datatable-shorting-icon icon icon-tabler icons-tabler-outline icon-tabler-arrow-down">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                         <path d="M12 5l0 14" />
                                         <path d="M18 13l-6 6" />
@@ -260,14 +261,332 @@
                             <th>Role</th>
                             <th>Status</th>
                             <th>Created Date</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody class="datatable-body">
                         <tr>
-                            <td></td>
+                            <td><input type="checkbox" class="datatable-checkbox user-select-checkbox"></td>
+                            <td>
+                                <div class="author-details-wrapper">
+                                    <div class="bg-purple author-profile">SB</div>
+                                    <div class="author-info">
+                                        <h3 class="h4 author-name">Sofia Bennett</h3>
+                                        <span class="author-email">sofia.bennett@amethyst.io</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="badge bg-purple">Marketing</div>
+                            </td>
+                            <td>
+                                <div class="badge bg-blue">Admin</div>
+                            </td>
+                            <td>
+                                <div class="badge status-badge bg-green">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="flex-shrink-0 status-badge-icon icon icon-tabler icons-tabler-filled icon-tabler-point">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"></path>
+                                    </svg>
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="created-date">Jan 21, 2026</div>
+                            </td>
+                            <td>
+                                <div class="row-actions-wrapper">
+                                    <button class="row-actions-btn action-btn" data-dropdown="actions">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 ellipsis-icon lucide lucide-ellipsis preview-icon">
+                                            <circle cx="12" cy="12" r="1" />
+                                            <circle cx="19" cy="12" r="1" />
+                                            <circle cx="5" cy="12" r="1" />
+                                        </svg>
+                                    </button>
+                                    <div class="row-actions-dropdown" data-dropdown-content="actions">
+                                        <div class="row-actions-stack">
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-pencil preview-icon">
+                                                    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                                    <path d="m15 5 4 4" />
+                                                </svg>
+                                                <span>Edit user</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-activity preview-icon">
+                                                    <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+                                                </svg>
+                                                <span>View activity</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-user-round-x preview-icon">
+                                                    <path d="m16.5 16.5 5 5" />
+                                                    <path d="M2 21a8 8 0 0 1 11.531-7.18" />
+                                                    <path d="m21.5 16.5-5 5" />
+                                                    <circle cx="10" cy="8" r="5" />
+                                                </svg>
+                                                <span>Deactivate user</span>
+                                            </button>
+                                            <button class="row-actions delete-action">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-trash preview-icon">
+                                                    <path d="M10 11v6" />
+                                                    <path d="M14 11v6" />
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                                <span>Delete user</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="datatable-checkbox user-select-checkbox"></td>
+                            <td>
+                                <div class="author-details-wrapper">
+                                    <div class="bg-blue author-profile">DK</div>
+                                    <div class="author-info">
+                                        <h3 class="h4 author-name">Daniel Kim</h3>
+                                        <span class="author-email">daniel.kim@amethyst.io</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="badge bg-beige">Administration</div>
+                            </td>
+                            <td>
+                                <div class="badge bg-blue">Admin</div>
+                            </td>
+                            <td>
+                                <div class="badge status-badge bg-green">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="flex-shrink-0 status-badge-icon icon icon-tabler icons-tabler-filled icon-tabler-point">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"></path>
+                                    </svg>
+                                    <span>Active</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="created-date">Aug 04, 2026</div>
+                            </td>
+                            <td>
+                                <div class="row-actions-wrapper">
+                                    <button class="row-actions-btn action-btn" data-dropdown="actions">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 ellipsis-icon lucide lucide-ellipsis preview-icon">
+                                            <circle cx="12" cy="12" r="1" />
+                                            <circle cx="19" cy="12" r="1" />
+                                            <circle cx="5" cy="12" r="1" />
+                                        </svg>
+                                    </button>
+                                    <div class="row-actions-dropdown" data-dropdown-content="actions">
+                                        <div class="row-actions-stack">
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-pencil preview-icon">
+                                                    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                                    <path d="m15 5 4 4" />
+                                                </svg>
+                                                <span>Edit user</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-activity preview-icon">
+                                                    <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+                                                </svg>
+                                                <span>View activity</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-user-round-x preview-icon">
+                                                    <path d="m16.5 16.5 5 5" />
+                                                    <path d="M2 21a8 8 0 0 1 11.531-7.18" />
+                                                    <path d="m21.5 16.5-5 5" />
+                                                    <circle cx="10" cy="8" r="5" />
+                                                </svg>
+                                                <span>Deactivate user</span>
+                                            </button>
+                                            <button class="row-actions delete-action">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-trash preview-icon">
+                                                    <path d="M10 11v6" />
+                                                    <path d="M14 11v6" />
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                                <span>Delete user</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="datatable-checkbox user-select-checkbox"></td>
+                            <td>
+                                <div class="author-details-wrapper">
+                                    <div class="bg-green author-profile">MP</div>
+                                    <div class="author-info">
+                                        <h3 class="h4 author-name">Maya Patel</h3>
+                                        <span class="author-email">maya.patel@amethyst.io</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="badge bg-green">Marketing</div>
+                            </td>
+                            <td>
+                                <div class="badge bg-grey">Member</div>
+                            </td>
+                            <td>
+                                <div class="badge status-badge bg-beige">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="flex-shrink-0 status-badge-icon icon icon-tabler icons-tabler-filled icon-tabler-point">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"></path>
+                                    </svg>
+                                    <span>Invited</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="created-date">Feb 24, 2025</div>
+                            </td>
+                            <td>
+                                <div class="row-actions-wrapper">
+                                    <button class="row-actions-btn action-btn" data-dropdown="actions">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 ellipsis-icon lucide lucide-ellipsis preview-icon">
+                                            <circle cx="12" cy="12" r="1" />
+                                            <circle cx="19" cy="12" r="1" />
+                                            <circle cx="5" cy="12" r="1" />
+                                        </svg>
+                                    </button>
+                                    <div class="row-actions-dropdown" data-dropdown-content="actions">
+                                        <div class="row-actions-stack">
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-pencil preview-icon">
+                                                    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                                    <path d="m15 5 4 4" />
+                                                </svg>
+                                                <span>Edit user</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-activity preview-icon">
+                                                    <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+                                                </svg>
+                                                <span>View activity</span>
+                                            </button>
+                                            <button class="row-actions">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-user-round-x preview-icon">
+                                                    <path d="m16.5 16.5 5 5" />
+                                                    <path d="M2 21a8 8 0 0 1 11.531-7.18" />
+                                                    <path d="m21.5 16.5-5 5" />
+                                                    <circle cx="10" cy="8" r="5" />
+                                                </svg>
+                                                <span>Deactivate user</span>
+                                            </button>
+                                            <button class="row-actions delete-action">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 row-actions-icon lucide lucide-trash preview-icon">
+                                                    <path d="M10 11v6" />
+                                                    <path d="M14 11v6" />
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                </svg>
+                                                <span>Delete user</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
+
+                <div class="empty-states empty-dataset">
+                    <div class="bg-purple empty-state-icon-block">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon lucide lucide-user-plus preview-icon">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="19" x2="19" y1="8" y2="14" />
+                            <line x1="22" x2="16" y1="11" y2="11" />
+                        </svg>
+                    </div>
+                    <div class="empty-states-content-wrapper">
+                        <h3 class="empty-state-title">Your team starts here</h3>
+                        <p class="text-secondary empty-state-description">
+                            Invite your first teammate to collaborate in Amethyst HQ.
+                        </p>
+                    </div>
+                    <button class="btn primary-btn empty-state-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-plus preview-icon">
+                            <path d="M5 12h14"></path>
+                            <path d="M12 5v14"></path>
+                        </svg>
+                        Add your first user
+                    </button>
+                </div>
+
+                <div class="empty-states filters-results">
+                    <div class="bg-purple empty-state-icon-block">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon lucide lucide-users-round preview-icon">
+                            <path d="M18 21a8 8 0 0 0-16 0" />
+                            <circle cx="10" cy="8" r="5" />
+                            <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+                        </svg>
+                    </div>
+                    <div class="empty-states-content-wrapper">
+                        <h3 class="empty-state-title">No users match your filters</h3>
+                        <p class="text-secondary empty-state-description">
+                            Try removing a filter or clearing all filters to see your directory.
+                        </p>
+                    </div>
+                    <button class="btn secondary-btn empty-state-btn">
+                        Clear filters
+                    </button>
+                </div>
+
+                <div class="empty-states search-results">
+                    <div class="bg-purple empty-state-icon-block">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon lucide lucide-search-x preview-icon">
+                            <path d="m13.5 8.5-5 5" />
+                            <path d="m8.5 8.5 5 5" />
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                    </div>
+                    <div class="empty-states-content-wrapper">
+                        <h3 class="empty-state-title">no results for ""</h3>
+                        <p class="text-secondary empty-state-description">
+                            Try a different name, email, role, or status.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="empty-states connection-error">
+                    <div class="bg-red empty-state-icon-block">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon lucide lucide-cloud-off preview-icon">
+                            <path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057" />
+                            <path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78" />
+                            <path d="m2 2 20 20" />
+                        </svg>
+                    </div>
+                    <div class="empty-states-content-wrapper">
+                        <h3 class="empty-state-title">We couldn’t load your users</h3>
+                        <p class="text-secondary empty-state-description">
+                            Your data is safe. Check your connection and try again.
+                        </p>
+                    </div>
+                    <button class="btn primary-btn empty-state-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-refresh-cw preview-icon">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                            <path d="M8 16H3v5" />
+                        </svg>
+                        Try again
+                    </button>
+                </div>
+            </div>
+
+            <div class="">
+
             </div>
         </div>
     </section>

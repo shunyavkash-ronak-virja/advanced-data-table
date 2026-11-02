@@ -127,7 +127,7 @@
   top: 100%;
   right: 0;
   padding-top: 6px;
-  z-index: 2;
+  z-index: 10;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8);
@@ -215,18 +215,23 @@
 }
 
 .datatable-outline {
-  border: 1px solid var(--purple-700);
   border-radius: 14px;
   margin-top: 16px;
-  overflow: auto;
+  background-color: var(--white);
+  overflow: auto hidden;
+  border: 1px solid var(--purple-700);
 }
 
 .datatable {
   width: 100%;
   min-width: 1000px;
   border-collapse: collapse;
-  background-color: var(--white-100);
   padding: 20px;
+}
+
+.datatable-head {
+  background-color: var(--white-100);
+  border-bottom: 1px solid var(--cloud-break-200);
 }
 
 .datatable-shorting-wrapper {
@@ -248,11 +253,47 @@
   width: 22px;
   aspect-ratio: 1;
   appearance: none;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   border: 1px solid var(--cloud-break-200);
   border-radius: 4px;
+  overflow: hidden;
   background-color: var(--white);
   cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.datatable-checkbox:checked {
+  background-color: var(--bluish-purple);
+  border-color: var(--bluish-purple);
+}
+
+.datatable-checkbox::before {
+  height: 80%;
+  aspect-ratio: 1;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+.check-all-checkbox::before {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus preview-icon"><path d="M5 12h14"/></svg>');
+  height: 80%;
+  aspect-ratio: 1;
+}
+
+.user-select-checkbox::before {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check preview-icon"><path d="M20 6 9 17l-5-5"/></svg>');
+}
+
+.datatable-checkbox:checked::before {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
 }
 
 .datatable-shorting-icon {
@@ -260,11 +301,169 @@
   aspect-ratio: 1;
 }
 
-.datatable-body tr {
-  padding: 18px 16px;
-  vertical-align: middle;
+.datatable-checkbox:is(:checked) .datatable-body tr {
+  background: var(--cloud-break-400);
 }
 
-.datatable-body tr:not(:last-child) {
+.datatable-body tr td {
+  padding: 18px 16px;
+  vertical-align: middle;
   border-bottom: 1px solid var(--cloud-break-200);
+}
+
+.datatable-body tr:last-child td {
+  border-bottom: none;
+}
+
+.author-details-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-profile {
+  width: 42px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.author-email {
+  font-size: 14px;
+  color: var(--encore);
+}
+
+.created-date {
+  font-size: 14px;
+  color: var(--encore);
+}
+
+.row-actions-wrapper {
+  position: relative;
+  justify-self: end;
+}
+
+.row-actions-btn {
+  width: 28px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: var(--white);
+  color: var(--encore);
+  transition: all 0.3s ease-in-out;
+}
+
+.row-actions-btn:hover {
+  background-color: var(--purple-200);
+  color: var(--purple-rain);
+}
+
+.ellipsis-icon {
+  height: 75%;
+}
+
+.row-actions-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  padding-top: 6px;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  transition: all 0.3s ease-in-out;
+}
+
+.row-actions-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.row-actions-stack {
+  width: 100%;
+  min-width: 190px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--cloud-break-200);
+  border-radius: 12px;
+  background-color: var(--white);
+  box-shadow: 0 8px 24px 0 var(--black-velvet-0_1);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease-in-out;
+}
+
+.row-actions:not(.delete-action):hover {
+  background-color: var(--bright-dusk);
+  color: var(--purple-rain);
+}
+
+.row-actions-icon {
+  width: 18px;
+  aspect-ratio: 1;
+  color: var(--encore);
+  transition: all 0.3s ease-in-out;
+}
+
+.row-actions:not(.delete-action):hover .row-actions-icon {
+  color: var(--purple-rain);
+}
+
+.delete-action:hover {
+  background-color: var(--hepatica);
+  color: var(--gory-movie);
+}
+
+.delete-action:hover .row-actions-icon {
+  color: var(--gory-movie);
+}
+
+.empty-states {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+  padding: 80px 40px;
+}
+
+.empty-state-icon-block {
+  width: 56px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.empty-state-icon {
+  width: 50%;
+}
+
+.empty-state-description {
+  margin-top: 8px;
+}
+
+.empty-dataset,
+.filters-results,
+.search-results,
+.connection-error {
+  display: none;
 }

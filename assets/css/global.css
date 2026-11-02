@@ -13,6 +13,7 @@
   --encore: #6b7280;
   --purple-rain: #7541c8;
   --purple-rain-0_15: #7541c826;
+  --bluish-purple: #7c3aed;
   --purple: #7041b8;
   /* --accent: #7041b8; */
   /* --focus-ring: #7041b8; */
@@ -54,6 +55,7 @@
   /* --bg-hover: #f5f1fa; */
   --cloud-break-200: #e6e0ef;
   --cloud-break-300: #f7f3fc;
+  --cloud-break-400: #f5f0ff;
   --orchid-petal: #bdb2cd;
   /* --border-strong: #bdb2cd; */
   --transparent: transparent;
@@ -142,56 +144,44 @@ h6 {
 
 .h1,
 h1:not(:where(.h2, .h3, .h4, .h5, .h6)) {
-  font-size: 40px;
-  font-weight: 500;
+  font-size: 28px;
+  font-weight: 600;
 }
 
 .h2,
 h2:not(:where(.h1, .h3, .h4, .h5, .h6)) {
-  font-size: 32px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
 }
 @media (max-width: 575px) {
   .h2,
   h2:not(:where(.h1, .h3, .h4, .h5, .h6)) {
-    font-size: 30px;
+    font-size: 20px;
   }
 }
 
 .h3,
 h3:not(:where(.h1, .h2, .h4, .h5, .h6)) {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 600;
 }
 @media (max-width: 575px) {
   .h3,
   h3:not(:where(.h1, .h2, .h4, .h5, .h6)) {
-    font-size: 24px;
+    font-size: 18px;
   }
 }
 
 .h4,
 h4:not(:where(.h1, .h2, .h3, .h5, .h6)) {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
 }
 @media (max-width: 575px) {
   .h4,
   h4:not(:where(.h1, .h2, .h3, .h5, .h6)) {
-    font-size: 20px;
+    font-size: 16px;
   }
-}
-
-.h5,
-h5:not(:where(.h1, .h2, .h3, .h4, .h6)) {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.h6,
-h6:not(:where(.h1, .h2, .h3, .h4, .h5)) {
-  font-size: 18px;
-  font-weight: 600;
 }
 
 a {
@@ -305,38 +295,53 @@ button {
   background-color: var(--cloud-break);
 }
 
+.badge {
+  max-width: max-content;
+  padding: 4px 10px;
+  border-radius: 36px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .status-badge {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
-  border-radius: 36px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .status-badge-icon {
-  width: 14px;
+  width: 16px;
+  aspect-ratio: 1;
 }
 
-.status-active {
+.bg-purple {
+  color: var(--purple-rain);
+  background-color: var(--bright-dusk);
+}
+
+.bg-grey {
+  color: var(--encore);
+  background-color: var(--white-100);
+}
+
+.bg-green {
   background-color: var(--bath-bubbles);
   color: var(--felt);
 }
 
-.status-pending {
+.bg-beige {
   color: var(--rat-brown);
-  background: var(--candlestick-point);
+  background-color: var(--candlestick-point);
 }
 
-.status-suspended {
+.bg-red {
   color: var(--gory-movie);
-  background: var(--hepatica);
+  background-color: var(--hepatica);
 }
 
-.status-invited {
+.bg-blue {
   color: var(--miracle-at-wrigley);
-  background: var(--cotton-boll);
+  background-color: var(--cotton-boll);
 }
 
 label:not(:where(.cursor-auto)) {
