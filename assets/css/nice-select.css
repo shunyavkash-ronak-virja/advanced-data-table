@@ -6,7 +6,7 @@
   font-size: 16px;
   line-height: var(--line-heights-1_25);
   padding-right: 26px !important;
-  color: var(--purple-1000);
+  color: var(--purple-900);
   display: block;
   outline: none;
   position: relative;
@@ -22,8 +22,8 @@
   content: "";
   width: 5px;
   height: 5px;
-  border-bottom: 2px solid var(--purple-1000);
-  border-right: 2px solid var(--purple-1000);
+  border-bottom: 2px solid var(--purple-900);
+  border-right: 2px solid var(--purple-900);
   display: block;
   margin-top: -4px;
   pointer-events: none;
@@ -92,7 +92,7 @@
   cursor: default;
 }
 .nice-select:has(.option.selected.disabled) .current {
-  color: var(--purple-1000);
+  color: var(--purple-900);
 }
 .nice-select .list::-webkit-scrollbar {
   width: 12px;

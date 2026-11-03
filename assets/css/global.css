@@ -3,6 +3,8 @@
   --black-0_38: #00000061;
   --white: #ffffff;
   --white-100: #f9fafb;
+  --white-200: #e5e7eb;
+  --white-300: #f8f7fc;
   /* --bg-surface: #ffffff; */
   /* --bg-input: #ffffff; */
   /* --text-on-accent: #ffffff; */
@@ -30,7 +32,8 @@
   /* --border-default: #e4dfec; */
   --purple-800: #62596d;
   /* --text-secondary: #62596d; */
-  --purple-1000: #898194;
+  --purple-900: #898194;
+  --purple-950: #5b21b6;
   /* --text-muted: #898194; */
   --felt: #217346;
   /* --success: #217346; */
@@ -42,13 +45,17 @@
   /* --warning-bg: #fff2d5; */
   --gory-movie: #b42336;
   /* --danger: #b42336; */
+  --gory-movie-100: #c1172d;
   --hepatica: #fce8ea;
   /* --danger-bg: #fce8ea; */
+  --hepatica-100: #ffd5da;
+  --hepatica-200: #ffb3bb;
   --miracle-at-wrigley: #285da8;
   /* --info: #285da8; */
   --cotton-boll: #e8f1fd;
   /* --info-bg: #e8f1fd; */
   --placebo-purple: #f0e8fc;
+  --placebo-purple-100: #ede9fe;
   --cloud-break: #f4effb;
   /* --bg-selected: #f4effb; */
   --cloud-break-100: #f5f1fa;
@@ -88,7 +95,7 @@ body {
   color: var(--black-velvet);
   background-color: var(--purple-300);
 }
-@media (max-width: 575px) {
+@media (max-width: 767px) {
   body {
     font-size: 14px;
   }
@@ -177,10 +184,16 @@ h4:not(:where(.h1, .h2, .h3, .h5, .h6)) {
   font-size: 18px;
   font-weight: 600;
 }
-@media (max-width: 575px) {
+@media (max-width: 991px) {
   .h4,
   h4:not(:where(.h1, .h2, .h3, .h5, .h6)) {
     font-size: 16px;
+  }
+}
+@media (max-width: 767px) {
+  .h4,
+  h4:not(:where(.h1, .h2, .h3, .h5, .h6)) {
+    font-size: 14px;
   }
 }
 
@@ -281,8 +294,21 @@ button {
 }
 
 .delete-btn {
-  color: var(--gory-movie);
   background-color: var(--hepatica);
+  color: var(--gory-movie);
+}
+
+.delete-btn:hover {
+  background-color: var();
+}
+
+.white-btn {
+  background-color: var(--white);
+  color: var(--purple-rain);
+}
+
+.white-btn:hover {
+  background-color: var(--purple-200);
 }
 
 .primary-icon {
@@ -302,6 +328,16 @@ button {
   font-size: 14px;
   font-weight: 500;
 }
+@media (max-width: 991px) {
+  .badge {
+    padding: 2px 8px;
+  }
+}
+@media (max-width: 767px) {
+  .badge {
+    font-size: 12px;
+  }
+}
 
 .status-badge {
   display: flex;
@@ -312,6 +348,16 @@ button {
 .status-badge-icon {
   width: 16px;
   aspect-ratio: 1;
+}
+@media (max-width: 991px) {
+  .status-badge-icon {
+    width: 13px;
+  }
+}
+@media (max-width: 767px) {
+  .status-badge-icon {
+    width: 12px;
+  }
 }
 
 .bg-purple {
@@ -465,7 +511,7 @@ select[required] {
 
 .scrollbar-horizontal::-webkit-scrollbar-thumb {
   border: 3px solid #fff0;
-  background-color: var(--orchid-petal);
+  background-color: var(--cloud-break-200);
   border-radius: 24px;
   background-clip: padding-box;
 }

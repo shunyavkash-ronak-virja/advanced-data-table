@@ -1,14 +1,39 @@
+@media (max-width: 991px) {
+  .datatable-outline {
+    --datatable-spacing: 16px;
+  }
+
+  .datatable-checkbox {
+    width: 20px;
+  }
+
+  .row-actions-stack {
+    min-width: 176px;
+    max-height: 152px;
+  }
+
+  .row-actions {
+    font-size: 14px;
+    padding-inline: 10px;
+  }
+
+  .row-actions-btn {
+    width: 24px;
+  }
+}
+
 @media (max-width: 767px) {
   .modal {
     padding: 16px;
   }
 
-  .datatable-toolbar {
+  .datatable-toolbar-filters,
+  .bulk-actions-wrapper {
     padding: 16px;
   }
 
-  .datatable-toolbar,
-  .toolbar-action-wrapper {
+  .toolbar-action-wrapper,
+  .bulk-actions {
     gap: 16px;
   }
 
@@ -41,11 +66,50 @@
   }
 
   .sorting-dropdown .toolbar-dropdown-stack {
-    min-width: 204px;
+    min-width: 178px;
   }
 
   .sorting-option {
     padding: 6px 8px;
+  }
+
+  .bulk-actions-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bulk-actions-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .datatable-outline {
+    --datatable-spacing: 14px;
+    margin-top: 16px;
+  }
+
+  .datatable-checkbox {
+    width: 18px;
+  }
+
+  .author-profile {
+    width: 38px;
+  }
+
+  .author-email {
+    font-size: 12px;
+  }
+
+  .empty-states {
+    padding: 60px 28px;
+  }
+
+  .empty-state-icon-block {
+    width: 50px;
+  }
+
+  .pagination-btn {
+    width: 30px;
   }
 }
 
@@ -74,12 +138,14 @@
     gap: 12px;
   }
 
-  .datatable-toolbar {
+  .datatable-toolbar-filters {
     flex-direction: column;
     align-items: end;
   }
+}
 
-  .sorting-dropdown .toolbar-dropdown-stack {
-    min-width: 184px;
+@media (max-width: 440px) {
+  .bulk-actions {
+    flex-wrap: wrap;
   }
 }
