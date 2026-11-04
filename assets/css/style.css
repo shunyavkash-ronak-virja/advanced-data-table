@@ -38,7 +38,6 @@
 
 .modal-dialog {
   width: 100%;
-  max-width: 720px;
   margin: auto;
   background-color: var(--white);
   border-radius: 18px;
@@ -46,6 +45,10 @@
   border: 1px solid var(--purple-700);
   transform: scale(0.8);
   transition: all 0.3s ease-in-out;
+}
+
+.add-user-dialog {
+  max-width: 720px;
 }
 
 .modal.active .modal-dialog {
@@ -135,6 +138,28 @@
 .bulk-actions-delete-btn:hover {
   background-color: var(--hepatica-200);
   color: var(--gory-movie-100);
+}
+
+.actions-modal {
+  max-width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.actions-icon-block {
+  width: 52px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions-icon {
+  width: 50%;
 }
 
 .toolbar-searchbar-stack {
@@ -569,4 +594,37 @@
 .page-num {
   font-size: 12px;
   font-weight: 600;
+}
+
+.actions-caption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.actions-modal-btns {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: end;
+}
+
+.lottie-container {
+  max-width: 226px;
+}
+
+.success-dialog {
+  gap: 16px;
+}
+
+.success-modal-btn {
+  justify-content: center;
+}
+
+.error-modal-btns .btn {
+  width: 100%;
+  justify-content: center;
 }

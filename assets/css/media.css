@@ -27,6 +27,10 @@
     padding: 16px;
   }
 
+  .add-user-dialog {
+    max-width: 100%;
+  }
+
   .datatable-toolbar-filters,
   .bulk-actions-wrapper {
     padding: 16px;
@@ -111,6 +115,19 @@
   .pagination-btn {
     width: 30px;
   }
+
+  .actions-modal,
+  .actions-modal-btns {
+    gap: 16px;
+  }
+
+  .actions-icon-block {
+    width: 48px;
+  }
+
+  .lottie-container {
+    max-width: 218px;
+  }
 }
 
 @media (max-width: 575px) {
@@ -141,6 +158,14 @@
   .datatable-toolbar-filters {
     flex-direction: column;
     align-items: end;
+  }
+
+  .actions-modal {
+    max-width: 100%;
+  }
+
+  .lottie-container {
+    max-width: 205px;
   }
 }
 

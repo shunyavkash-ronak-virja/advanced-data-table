@@ -133,6 +133,10 @@ body {
   color: var(--encore);
 }
 
+.w-100 {
+  width: 100%;
+}
+
 .h1,
 h1,
 .h2,
@@ -159,6 +163,12 @@ h1:not(:where(.h2, .h3, .h4, .h5, .h6)) {
 h2:not(:where(.h1, .h3, .h4, .h5, .h6)) {
   font-size: 24px;
   font-weight: 600;
+}
+@media (max-width: 767px) {
+  .h2,
+  h2:not(:where(.h1, .h3, .h4, .h5, .h6)) {
+    font-size: 22px;
+  }
 }
 @media (max-width: 575px) {
   .h2,
@@ -299,7 +309,7 @@ button {
 }
 
 .delete-btn:hover {
-  background-color: var();
+  background-color: var(--hepatica-100);
 }
 
 .white-btn {
@@ -490,6 +500,7 @@ select[required] {
 }
 
 .secondary-border {
+  width: 100%;
   border-top: 1px solid var(--purple-700);
 }
 

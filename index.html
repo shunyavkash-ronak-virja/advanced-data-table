@@ -35,7 +35,7 @@
                         <span>Add User</span>
                     </button>
                     <div class="scrollbar-vertical modal" id="add-user">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog add-user-dialog">
                             <div class="modal-head-wrapper">
                                 <div class="modal-head-content">
                                     <h2 class="modal-title">Create new user</h2>
@@ -243,23 +243,82 @@
                         </div>
                     </div>
                 </div>
-                <div class="bulk-actions-wrapper">
+                <div class="bulk-actions-wrapper show">
                     <div class="bulk-actions-counter">2 users selected</div>
                     <div class="bulk-actions">
-                        <button class="btn white-btn bulk-actions-btn">
+                        <button class="btn white-btn bulk-actions-btn" data-modal="activate">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-check preview-icon">
                                 <path d="M20 6 9 17l-5-5" />
                             </svg>
                             <span>Activate</span>
                         </button>
-                        <button class="btn white-btn bulk-actions-btn">
+                        <!----- Activate Modal ----->
+                        <div class="scrollbar-vertical modal" id="activate">
+                            <div class="modal-dialog actions-modal confirmation-dialog">
+                                <div class="bg-green actions-icon-block">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="actions-icon lucide lucide-user-check preview-icon">
+                                        <path d="m16 11 2 2 4-4" />
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <h2 class="actions-modal-title">Activate selected users?</h2>
+                                <p class="text-secondary actions-modal-description">
+                                    Are you sure you want to activate these <span class="actions-user-value">3</span> selected users? They will regain access to the workspace.
+                                </p>
+                                <p class="actions-caption">
+                                    Selected users:
+                                    <span class="actions-caption-value">
+                                        <span class="actions-user-value">3</span>
+                                        users
+                                    </span>
+                                </p>
+                                <div class="secondary-border"></div>
+                                <div class="actions-modal-btns">
+                                    <button class="btn secondary-btn modal-close" type="button">Cancel</button>
+                                    <button class="btn primary-btn" type="submit">Activate users</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn white-btn bulk-actions-btn" data-modal="deactivate">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-ban preview-icon">
                                 <circle cx="12" cy="12" r="10" />
                                 <path d="M4.929 4.929 19.07 19.071" />
                             </svg>
                             <span>Deactivate</span>
                         </button>
-                        <button class="btn bulk-actions-delete-btn bulk-actions-btn">
+                        <!----- Deactivate Modal ----->
+                        <div class="scrollbar-vertical modal" id="deactivate">
+                            <div class="modal-dialog actions-modal deactivate-dialog">
+                                <div class="bg-beige actions-icon-block">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="actions-icon lucide lucide-user-round-x preview-icon">
+                                        <path d="m16.5 16.5 5 5" />
+                                        <path d="M2 21a8 8 0 0 1 11.531-7.18" />
+                                        <path d="m21.5 16.5-5 5" />
+                                        <circle cx="10" cy="8" r="5" />
+                                    </svg>
+                                </div>
+                                <h2 class="actions-modal-title">Deactivate selected users?</h2>
+                                <p class="text-secondary actions-modal-description">
+                                    Are you sure you want to deactivate these
+                                    <span class="actions-user-value">3</span>
+                                    selected users? They will no longer be able to access the workspace.
+                                </p>
+                                <p class="actions-caption">
+                                    Selected users:
+                                    <span class="actions-caption-value">
+                                        <span class="actions-user-value">3</span>
+                                        users
+                                    </span>
+                                </p>
+                                <div class="secondary-border"></div>
+                                <div class="actions-modal-btns">
+                                    <button class="btn secondary-btn modal-close" type="button">Cancel</button>
+                                    <button class="btn primary-btn" type="submit">Deactivate users</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn bulk-actions-delete-btn bulk-actions-btn" data-modal="delete">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 btn-icon lucide lucide-trash preview-icon">
                                 <path d="M10 11v6" />
                                 <path d="M14 11v6" />
@@ -269,10 +328,70 @@
                             </svg>
                             <span>Delete</span>
                         </button>
+                        <!----- Delete Modal ----->
+                        <div class="scrollbar-vertical modal" id="delete">
+                            <div class="modal-dialog actions-modal delete-dialog">
+                                <div class="bg-red actions-icon-block">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="actions-icon lucide lucide-trash preview-icon">
+                                        <path d="M10 11v6" />
+                                        <path d="M14 11v6" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                        <path d="M3 6h18" />
+                                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </div>
+                                <h2 class="actions-modal-title">Delete selected users?</h2>
+                                <p class="text-secondary actions-modal-description">
+                                    Are you sure you want to permanently delete these
+                                    <span class="actions-user-value">3</span>
+                                    users? This action cannot be undone.
+                                </p>
+                                <p class="actions-caption">
+                                    Selected users:
+                                    <span class="actions-caption-value">
+                                        <span class="actions-user-value">3</span>
+                                        users
+                                    </span>
+                                </p>
+                                <div class="secondary-border"></div>
+                                <div class="actions-modal-btns">
+                                    <button class="btn secondary-btn modal-close" type="button">Cancel</button>
+                                    <button class="btn delete-btn" type="submit">Delete users</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!----- Success Modal ----->
+                        <div class="scrollbar-vertical modal" id="success-modal">
+                            <div class="modal-dialog actions-modal success-dialog">
+                                <dotlottie-wc class="lottie-container" src="https://lottie.host/a8c78a6a-c30b-4f78-a417-00c8bd90ff40/6hOo8KTXrH.json" autoplay speed="1.4">
+                                </dotlottie-wc>
+                                <h2 class="success-modal-title">Users activated</h2>
+                                <p class="text-secondary success-modal-description">
+                                    <span class="actions-user-value">3</span> users have been successfully activated.
+                                </p>
+                                <button class="btn primary-btn w-100 success-modal-btn" type="button">Done</button>
+                            </div>
+                        </div>
+                        <!----- Error Modal ----->
+                        <div class="scrollbar-vertical modal" id="error-modal">
+                            <div class="modal-dialog actions-modal error-dialog">
+                                <dotlottie-wc class="error-lottie lottie-container" src="https://lottie.host/e4bd06c6-acb8-4f06-b55d-85b596babce2/f88wqISYQH.lottie" autoplay speed="1.4">
+                                </dotlottie-wc>
+                                <h2 class="error-modal-title">Couldn't deactivate users</h2>
+                                <p class="text-secondary error-modal-description">
+                                    Something went wrong while updating the selected users. Your changes have not been saved.
+                                </p>
+                                <div class="actions-modal-btns error-modal-btns">
+                                    <button class="btn secondary-btn modal-close" type="button">Cancel</button>
+                                    <button class="btn primary-btn" type="button">Try again</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!----- Datatable ----->
             <div class="scrollbar-horizontal datatable-outline">
                 <table class="datatable">
                     <thead class="datatable-head">
@@ -531,6 +650,7 @@
                     </tbody>
                 </table>
 
+                <!----- Empty States ----->
                 <div class="empty-states empty-dataset">
                     <div class="bg-purple empty-state-icon-block">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-state-icon lucide lucide-user-plus preview-icon">
@@ -616,6 +736,7 @@
                     </button>
                 </div>
 
+                <!----- Pagination ----->
                 <div class="pagination-wrapper">
                     <div class="text-secondary pagination-info">
                         Showing <span class="perpage-user-list">1–8</span> of <span class="total-user-value">248</span> users
@@ -632,7 +753,6 @@
                         <button class="pagination-btn page-num">3</button>
                         <div class="pagination-btn page-dots">...</div>
                         <button class="pagination-btn page-num">32</button>
-
                         <button class="pagination-btn pagination-arrow">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagination-arrow-icon lucide lucide-chevron-right preview-icon">
                                 <path d="m9 18 6-6-6-6" />
@@ -643,6 +763,9 @@
             </div>
         </div>
     </section>
+
+    <!-----  Lottie Animation Js ----->
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@latest/dist/dotlottie-wc.js" type="module"></script>
 
     <!----- Nice Select js ----->
     <script src="assets/js/jquery.js"></script>
