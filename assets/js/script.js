@@ -7,48 +7,57 @@ $(document).ready(function () {
 
 // ================================
 // GLOBAL MODAL JS
-// ================================
-const modal = document.querySelectorAll(".modal");
-if (modal) {
+// ================================ 
+const modals = document.querySelectorAll(".modal, .sidebar");
+if (modals.length) {
     const modalBtns = document.querySelectorAll("[data-modal]");
-    const modalCloseBtns = document.querySelectorAll(".modal-close");
-    const modal = document.querySelectorAll(".modal");
+    const modalCloseBtns = document.querySelectorAll(".modal-close, .sidebar-close");
+
+    const modalOpen = (id) => {
+        const modal = document.getElementById(id);
+
+        if (modal) {
+            modal.classList.add("active");
+            document.body.classList.add("body-hidden");
+        }
+    };
+
+    const modalClose = (id) => {
+        const modal = document.getElementById(id);
+
+        if (modal) {
+            modal.classList.remove("active");
+            const activeModal = document.querySelector(".modal.active, .sidebar.active");
+
+            if (!activeModal) {
+                document.body.classList.remove("body-hidden");
+            }
+        }
+    };
 
     modalBtns.forEach((button) => {
         button.addEventListener("click", () => {
-            const id = button.dataset.modal;
-            modalOpen(id);
+            modalOpen(button.dataset.modal);
         });
     });
-
 
     modalCloseBtns.forEach((button) => {
         button.addEventListener("click", () => {
-            const id = button.closest(".modal").id;
-            modalClose(id);
-        });
-    });
+            const parent = button.closest(".modal, .sidebar");
 
-    modal.forEach((modal) => {
-        modal.addEventListener("click", (event) => {
-            if (event.target.classList.contains("modal")) {
-                const id = modal.id;
-                modalClose(id);
+            if (parent) {
+                modalClose(parent.id);
             }
         });
     });
 
-    const modalOpen = (id) => {
-        const modal = document.querySelector(`#${id}`);
-        if (modal) modal.classList.add("active");
-        document.body.classList.add("body-hidden");
-    };
-
-    const modalClose = (id) => {
-        const modal = document.querySelector(`#${id}`);
-        if (modal) modal.classList.remove("active");
-        document.body.classList.remove("body-hidden");
-    };
+    modals.forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modalClose(modal.id);
+            }
+        });
+    });
 }
 
 // ================================

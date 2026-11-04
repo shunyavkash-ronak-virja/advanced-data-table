@@ -14,45 +14,76 @@
   margin-top: 6px;
 }
 
-.modal {
+/* ----- Modal start ----- */
+.modal,
+.sidebar {
   position: fixed;
-  inset: 0;
   z-index: 999;
-  display: flex;
-  padding: 20px;
   background-color: var(--black-0_38);
-  overflow: auto;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease-in-out;
 }
 
-.modal::-webkit-scrollbar-thumb {
+.modal {
+  inset: 0;
+  padding: 20px;
+  display: flex;
+  overflow: auto;
+}
+
+.sidebar {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+}
+
+.modal::-webkit-scrollbar-thumb,
+.sidebar-dialog::-webkit-scrollbar-thumb {
   background-color: var(--black-0_38);
 }
 
-.modal.active {
+.modal.active,
+.sidebar.active {
   opacity: 1;
   visibility: visible;
 }
 
-.modal-dialog {
+.modal-dialog,
+.sidebar-dialog {
   width: 100%;
-  margin: auto;
   background-color: var(--white);
-  border-radius: 18px;
-  padding: 20px;
-  border: 1px solid var(--purple-700);
-  transform: scale(0.8);
+  padding: 26px;
   transition: all 0.3s ease-in-out;
 }
 
-.add-user-dialog {
+.modal-dialog {
+  margin: auto;
+  border-radius: 18px;
+  transform: scale(0.8);
+  border: 1px solid var(--purple-700);
+}
+
+.sidebar-dialog {
+  max-width: 440px;
+  height: 100vh;
+  overflow-y: auto;
+  margin-left: auto;
+  border-left: 1px solid var(--purple-700);
+  transform: translateX(100%);
+}
+
+.user-form-dialog {
   max-width: 720px;
 }
 
 .modal.active .modal-dialog {
   transform: scale(1);
+}
+
+.sidebar.active .sidebar-dialog {
+  transform: translateX(0);
 }
 
 .modal-head-wrapper {
@@ -66,11 +97,11 @@
   margin-top: 4px;
 }
 
-.modal-close-icon {
+.close-icon {
   width: 50%;
 }
 
-.add-user-form {
+.user-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
@@ -83,6 +114,84 @@
   justify-content: end;
   gap: 16px;
 }
+/* ----- Modal close ----- */
+
+/* ----- Sidebar start ----- */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-description {
+  margin-top: 4px;
+}
+
+.sidebar-head-wrapper {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sidebar-description {
+  font-size: 14px;
+}
+
+.user-details-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  /* margin-top: 20px;   */
+}
+
+.user-details-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: var(--line-heights-1);
+}
+
+.sidebar-user-email {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.user-status-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recent-activity-title {
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.recent-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+.recent-activity-item::marker,
+.activity-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.activity-caption {
+  margin-top: 12px;
+  font-size: 12px;
+}
+/* ----- Sidebar close ----- */
 
 .datatable-toolbar {
   flex-direction: column;
@@ -621,10 +730,5 @@
 }
 
 .success-modal-btn {
-  justify-content: center;
-}
-
-.error-modal-btns .btn {
-  width: 100%;
   justify-content: center;
 }
