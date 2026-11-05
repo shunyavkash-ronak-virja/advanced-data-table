@@ -450,6 +450,13 @@
   border-color: var(--bluish-purple);
 }
 
+/* 
+-------------- AI style -------------
+.datatable-checkbox:indeterminate {
+  background: var(--bluish-purple);
+  border-color: var(--bluish-purple);
+} */
+
 .datatable-checkbox::before {
   height: 80%;
   aspect-ratio: 1;
@@ -476,6 +483,14 @@
   transform: scale(1);
 }
 
+/* 
+-------------- AI style -------------
+.datatable-checkbox:indeterminate::before {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+} */
+
 .datatable-shorting-icon {
   width: 14px;
   aspect-ratio: 1;
@@ -487,8 +502,8 @@
   overflow: hidden;
 }
 
-.datatable-checkbox:is(:checked) .datatable-body tr {
-  background: var(--cloud-break-400);
+.datatable-body tr.selected {
+  background-color: var(--bg-surface-soft);
 }
 
 .datatable-body tr td {
@@ -662,8 +677,36 @@
   padding: var(--datatable-spacing);
 }
 
-.pagination-info {
+.input-field.page-size {
+  display: inline;
+  padding: 2px 6px;
+  padding-right: 16px;
   font-size: 14px;
+  border-radius: 6px;
+}
+
+.input-field.page-size:after {
+  width: 4px;
+  border-width: 1px;
+  right: 6px;
+  transform-origin: 50% 75%;
+}
+
+.page-size .list {
+  padding: 6px;
+  border-radius: 6px;
+  gap: 10px;
+}
+
+.page-size .list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.page-size .list::-webkit-scrollbar-thumb {
+  border: 1px solid #fff0;
+  background-color: var(--orchid-petal);
+  border-radius: 24px;
+  background-clip: padding-box;
 }
 
 .pagination {
@@ -731,4 +774,48 @@
 
 .success-modal-btn {
   justify-content: center;
+}
+
+#page-size {
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--cloud-break-200);
+  border-radius: 6px;
+  background: white;
+  padding: 3px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: user-spin 0.7s linear infinite;
+}
+
+@keyframes user-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton-line {
+  height: 18px;
+  border-radius: 6px;
+  background: var(--cloud-break-200);
+  animation: skeleton-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes skeleton-pulse {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-spinner,
+  .skeleton-line {
+    animation: none;
+  }
 }

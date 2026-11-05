@@ -1,11 +1,11 @@
-.nice-select {
+.input-field.nice-select {
   width: 100%;
   -webkit-tap-highlight-color: #fff0;
   box-sizing: border-box;
   clear: both;
   font-size: 16px;
   line-height: var(--line-heights-1_25);
-  padding-right: 26px !important;
+  padding-right: 26px;
   color: var(--purple-900);
   display: block;
   outline: none;
@@ -21,7 +21,7 @@
 .nice-select:after {
   content: "";
   width: 5px;
-  height: 5px;
+  aspect-ratio: 1;
   border-bottom: 2px solid var(--purple-900);
   border-right: 2px solid var(--purple-900);
   display: block;
@@ -94,10 +94,10 @@
 .nice-select:has(.option.selected.disabled) .current {
   color: var(--purple-900);
 }
-.nice-select .list::-webkit-scrollbar {
+.nice-select:not(.page-size) .list::-webkit-scrollbar {
   width: 12px;
 }
-.nice-select .list::-webkit-scrollbar-thumb {
+.nice-select:not(.page-size) .list::-webkit-scrollbar-thumb {
   border: 4px solid #fff0;
   background-color: var(--orchid-petal);
   border-radius: 24px;

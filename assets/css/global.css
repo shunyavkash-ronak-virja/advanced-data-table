@@ -546,3 +546,12 @@ select[required] {
 .outline-block:hover {
   border-color: var(--orchid-petal);
 }
+
+.field-error {
+  color: var(--gory-movie);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.input-field[aria-invalid="true"] {
+  border-color: var(--gory-movie);
+}
