@@ -5,11 +5,7 @@
   --white-100: #f9fafb;
   --white-200: #e5e7eb;
   --white-300: #f8f7fc;
-  /* --bg-surface: #ffffff; */
-  /* --bg-input: #ffffff; */
-  /* --text-on-accent: #ffffff; */
   --black-velvet: #241a35;
-  /* --text-primary: #241d30; */
   --black-velvet-0_1: #241a351a;
   --bright-dusk: #f0e9fa;
   --encore: #6b7280;
@@ -17,54 +13,35 @@
   --purple-rain-0_15: #7541c826;
   --bluish-purple: #7c3aed;
   --purple: #7041b8;
-  /* --accent: #7041b8; */
-  /* --focus-ring: #7041b8; */
   --purple-100: #5c329c;
-  /* --accent-hover: #5c329c; */
   --purple-200: #dccaf7;
   --purple-300: #f7f6fa;
-  /* --bg-app: #f7f6fa; */
   --purple-500: #f0ecf8;
-  /* --bg-sidebar: #f0ecf8; */
   --purple-600: #eae2f8;
-  /* --accent-soft: #eae2f8; */
   --purple-700: #e4dfec;
-  /* --border-default: #e4dfec; */
   --purple-800: #62596d;
-  /* --text-secondary: #62596d; */
   --purple-900: #898194;
   --purple-950: #5b21b6;
-  /* --text-muted: #898194; */
   --felt: #217346;
-  /* --success: #217346; */
   --bath-bubbles: #e5f4ea;
-  /* --success-bg: #e5f4ea; */
   --rat-brown: #895b08;
-  /* --warning: #895b08; */
   --candlestick-point: #fff2d5;
-  /* --warning-bg: #fff2d5; */
+  --red: #ef4444;
   --gory-movie: #b42336;
-  /* --danger: #b42336; */
   --gory-movie-100: #c1172d;
   --hepatica: #fce8ea;
-  /* --danger-bg: #fce8ea; */
   --hepatica-100: #ffd5da;
   --hepatica-200: #ffb3bb;
   --miracle-at-wrigley: #285da8;
-  /* --info: #285da8; */
   --cotton-boll: #e8f1fd;
-  /* --info-bg: #e8f1fd; */
   --placebo-purple: #f0e8fc;
   --placebo-purple-100: #ede9fe;
   --cloud-break: #f4effb;
-  /* --bg-selected: #f4effb; */
   --cloud-break-100: #f5f1fa;
-  /* --bg-hover: #f5f1fa; */
   --cloud-break-200: #e6e0ef;
   --cloud-break-300: #f7f3fc;
   --cloud-break-400: #f5f0ff;
   --orchid-petal: #bdb2cd;
-  /* --border-strong: #bdb2cd; */
   --transparent: transparent;
   --font-ibm-plex-sans: "IBM Plex Sans", sans-serif;
   --font-manrope: "Manrope", sans-serif;
@@ -552,6 +529,12 @@ select[required] {
   font-size: 12px;
   margin-top: 4px;
 }
+
 .input-field[aria-invalid="true"] {
-  border-color: var(--gory-movie);
+  border-color: var(--red);
+}
+
+.input-error {
+  font-size: 14px;
+  color: var(--red);
 }
