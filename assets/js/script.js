@@ -8,7 +8,7 @@
     const statuses = ['active', 'pending', 'suspended', 'invited'];
     const names = ['Sofia Bennett', 'Daniel Kim', 'Maya Patel', 'Oliver Johnson', 'Ava Williams', 'Noah Brown', 'Emma Davis', 'Liam Wilson', 'Isabella Moore', 'Ethan Taylor', 'Amelia Anderson', 'Lucas Thomas', 'Mia Jackson', 'James White', 'Charlotte Harris', 'Benjamin Martin', 'Harper Thompson', 'Henry Garcia', 'Ella Martinez', 'Alexander Robinson', 'Grace Clark', 'Michael Rodriguez', 'Chloe Lewis', 'William Lee', 'Zoe Walker', 'Elijah Hall', 'Aria Allen', 'Logan Young', 'Lily King', 'Jack Wright', 'Nora Scott', 'Samuel Green', 'Emily Baker', 'David Adams', 'Ruby Nelson', 'Jacob Carter', 'Hannah Mitchell', 'Leo Perez', 'Sarah Roberts', 'Nathan Turner', 'Aiden Phillips', 'Olivia Campbell', 'Ryan Parker', 'Layla Evans', 'Aaron Edwards', 'Eva Collins', 'Owen Stewart', 'Alice Morris', 'Isaac Rogers', 'Leah Reed'];
     const label = (v, options) => options.find(o => o.value === v)?.label || (v ? v.charAt(0).toUpperCase() + v.slice(1) : '');
-    const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const uid = () => window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const normalizeEmail = v => v.trim().toLowerCase();
     function validDate(value) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
@@ -72,7 +72,13 @@
         return filtered.sort((a, b) => { const av = field === 'department' ? label(a.department, departments) : a.name; const bv = field === 'department' ? label(b.department, departments) : b.name; const cmp = av.localeCompare(bv, undefined, { sensitivity: 'base' }); return (direction === 'desc' ? -cmp : cmp) || a.id.localeCompare(b.id); });
     }
     const visiblePage = rows => rows.slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
-    function setBadge(el, text, color) { el.textContent = text; el.className = `badge ${color}`; }
+    function setBadge(el, text, color) {
+        // Keep original badge-small and other layout classes. Only replace background colors.
+        const colors = ['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'];
+        el.classList.remove(...colors);
+        el.classList.add(color);
+        el.textContent = text;
+    }
     function renderRow(user) {
         const tr = rowTemplate.content.firstElementChild.cloneNode(true);
         tr.dataset.userId = user.id;
@@ -166,16 +172,23 @@
         host.appendChild(makeArrow('next', state.page === pages));
     }
     function updateSelection() {
-        for (const id of [...state.selected])
-            if (!getUser(id))
-                state.selected.delete(id);
-        const checks = $$('.user-select-checkbox', body);
-        const checked = checks.filter(c => c.checked).length;
-        const all = $('#check-all');
-        all.checked = checks.length > 0 && checked === checks.length;
-        all.indeterminate = checked > 0 && checked < checks.length;
-        $('.bulk-actions-wrapper').classList.toggle('show', state.selected.size > 0);
-        $('.bulk-actions-counter').textContent = `${state.selected.size} user${state.selected.size === 1 ? '' : 's'} selected`;
+        // Remove deleted users from selection.
+        for (const id of [...state.selected]) {
+            if (!getUser(id)) state.selected.delete(id);
+        }
+        const checkboxes = $$('.user-select-checkbox', body);
+        let checkedCount = 0;
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) checkedCount++;
+        });
+        const checkAll = $('#check-all');
+        checkAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+        checkAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        const count = state.selected.size;
+        const bulkToolbar = $('.bulk-actions-wrapper');
+        bulkToolbar.classList.toggle('show', count > 0);
+        bulkToolbar.hidden = count === 0;
+        $('.bulk-actions-counter').textContent = count + (count === 1 ? ' user selected' : ' users selected');
     }
     function render() {
         const rows = results();
@@ -196,21 +209,56 @@
                 $('.empty-state-title', el).textContent = 'No users match these filters';
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
-        $('.pagination-wrapper').hidden = empty;
+        // Keep the pagination summary visible, including the 0-user state.
+        $('.pagination-wrapper').hidden = false;
         renderPagination(rows.length);
         updateSelection();
         if (state.detailId && getUser(state.detailId))
             renderDetails(getUser(state.detailId));
     }
     function syncSelect(select) {
-        if (window.jQuery && window.jQuery.fn.niceSelect)
+        if (window.jQuery && window.jQuery.fn.niceSelect) {
             window.jQuery(select).niceSelect('update');
+        }
     }
     function formFields(prefix) { return { name: $(`#${prefix}-name`), email: $(`#${prefix}-email`), department: $(`#${prefix}-department`), role: $(`#${prefix}-role`), status: $(`#${prefix}-status`), createdDate: $(`#${prefix}-registration-date`) }; }
-    function clearErrors(form) { $$('.input-error', form).forEach(x => x.remove()); $$('[aria-invalid]', form).forEach(x => { x.removeAttribute('aria-invalid'); x.classList.remove('input-error-field'); }); }
-    function fieldError(el, message) {
-        el.setAttribute('aria-invalid', 'true'); const p = document.createElement('span'); p.className = 'input-error'; p.textContent = message; const stack = el.closest('.input-stack'); if (stack)
-            stack.append(p); el.classList.add('input-error-field');
+    function clearFieldError(input) {
+        input.removeAttribute('aria-invalid');
+        input.classList.remove('input-error-field');
+        const stack = input.closest('.input-stack');
+        if (stack) {
+            const message = stack.querySelector('.input-error');
+            if (message) message.remove();
+        }
+        if (input.tagName === 'SELECT') {
+            const nice = input.nextElementSibling;
+            if (nice && nice.classList.contains('nice-select')) {
+                nice.removeAttribute('aria-invalid');
+                nice.classList.remove('input-error-field');
+            }
+        }
+    }
+    function clearErrors(form) {
+        $$('input, select, textarea', form).forEach(clearFieldError);
+    }
+    function fieldError(input, message) {
+        clearFieldError(input);
+        input.setAttribute('aria-invalid', 'true');
+        input.classList.add('input-error-field');
+        if (input.tagName === 'SELECT') {
+            const nice = input.nextElementSibling;
+            if (nice && nice.classList.contains('nice-select')) {
+                nice.setAttribute('aria-invalid', 'true');
+                nice.classList.add('input-error-field');
+            }
+        }
+        const stack = input.closest('.input-stack');
+        if (stack) {
+            const text = document.createElement('span');
+            text.className = 'input-error';
+            text.textContent = message;
+            stack.appendChild(text);
+        }
     }
     function validate(fields, excludeId) {
         const data = Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value.trim()]));
@@ -246,17 +294,25 @@
         document.body.classList.add('body-hidden');
         requestAnimationFrame(() => { const focus = $('input:not([type=hidden]),button', modal); focus?.focus(); });
     }
+    function syncBodyScroll() {
+        const open = document.querySelector('.modal.active, .sidebar.active');
+        document.body.classList.toggle('body-hidden', Boolean(open));
+    }
     function closeModal(id) {
         const modal = document.getElementById(id);
-        if (!modal)
-            return;
+        if (!modal) return;
         modal.classList.remove('active');
-        if (!$('.modal.active, .sidebar.active'))
-            document.body.classList.remove('body-hidden');
-        if (modal._previousFocus?.isConnected)
+        syncBodyScroll();
+        if (modal._previousFocus && modal._previousFocus.isConnected) {
             modal._previousFocus.focus();
+        }
     }
-    function closeAll() { $$('.modal.active,.sidebar.active').forEach(el => closeModal(el.id)); }
+    function closeAll() {
+        $$('.modal.active, .sidebar.active').forEach(function (modal) {
+            modal.classList.remove('active');
+        });
+        syncBodyScroll();
+    }
     function closeDropdowns() { $$('.toolbar-dropdown-block.show,.row-actions-dropdown.show').forEach(el => el.classList.remove('show')); }
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
@@ -295,8 +351,7 @@
         const u = id ? getUser(id) : null;
         if (u)
             Object.entries(fields).forEach(([k, el]) => { el.value = u[k]; });
-        else
-            fields.createdDate.value = today();
+        // New user fields start empty, including the required registration date.
         Object.values(fields).filter(el => el.tagName === 'SELECT').forEach(syncSelect);
         openModal(prefix);
     }
@@ -328,11 +383,11 @@
         deactivate: { verb: 'deactivate', past: 'deactivated', title: 'Deactivate Selected Users', success: 'Users Deactivated' },
         delete: { verb: 'delete', past: 'deleted', title: 'Delete Selected Users', success: 'Users Deleted' }
     };
-    function actionIds(ids, action) { return ids.filter(id => { const u = getUser(id); return u && (action === 'delete' || (action === 'activate' ? u.status !== 'active' : u.status === 'active')); }); }
+    function actionIds(ids, action) { return ids.filter(id => { const u = getUser(id); return u && (action === 'delete' || (action === 'activate' ? u.status !== 'active' : u.status !== 'suspended')); }); }
     function beginAction(action, ids, individual = false) {
         const effective = actionIds(ids, action);
         if (!effective.length) {
-            showError('No changes needed', 'No selected users require this action.');
+            showError('No eligible users', 'Select at least one user who can be ' + ACTIONS[action].past + '.');
             return;
         }
         state.pending = { action, ids: effective, individual };
@@ -383,7 +438,8 @@
         let avatarNumber = 0;
         for (let i = 0; i < u.name.length; i++)
             avatarNumber += u.name.charCodeAt(i);
-        sidebarAvatar.className = 'sidebar-author-profile ' + ['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'][avatarNumber % 6];
+        sidebarAvatar.classList.remove('bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey');
+        sidebarAvatar.classList.add(['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'][avatarNumber % 6]);
         $('.sidebar-user-name', root).textContent = u.name;
         $('.sidebar-user-email', root).textContent = u.email;
         const badges = $$('.user-status-wrapper .badge', root);
@@ -394,18 +450,14 @@
         setBadge(badges[0], label(u.department, departments), deptColor);
         setBadge(badges[1], label(u.role, []), roleColor);
         setBadge(badges[2], label(u.status, []), statusColor);
-        const list = $('.recent-activity-list', root);
-        list.replaceChildren();
-        const li = document.createElement('li');
-        li.className = 'recent-activity-item';
-        const title = document.createElement('p');
-        title.className = 'activity-title';
-        title.textContent = 'Account created';
-        const date = document.createElement('span');
-        date.className = 'text-secondary activity-caption';
-        date.textContent = dateLabel(u.createdDate);
-        li.append(title, date);
-        list.append(li);
+        // Keep the sidebar's original activity markup and classes intact.
+        const activityList = $('.recent-activity-list', root);
+        const items = $$('.recent-activity-item', activityList);
+        if (items.length) {
+            const lastItem = items[items.length - 1];
+            const caption = $('.activity-caption', lastItem);
+            if (caption) caption.textContent = dateLabel(u.createdDate);
+        }
     }
     function resetFilters() {
         const form = $('.filters-dropdown form');
@@ -445,14 +497,21 @@
         }));
     }
     function init() {
+        // The original HTML places bulk modals inside the toolbar.
+        // Move only the modal elements (not their icons or contents) outside
+        // the hidden toolbar so they can open independently.
+        $$('.bulk-actions-wrapper > .bulk-actions > .modal, .bulk-actions-wrapper .modal').forEach(function (modal) {
+            document.body.appendChild(modal);
+        });
         $$('.user-form, .filters-dropdown form').forEach(form => form.noValidate = true);
         if (window.jQuery && window.jQuery.fn.niceSelect) {
-            window.jQuery('select:not(#page-size)').niceSelect();
+            window.jQuery('select').niceSelect();
         }
         $('.datatable').hidden = false;
         renderSkeleton();
         setTimeout(render, 180);
         $('#searchbar').addEventListener('input', e => { state.search = e.target.value.trim(); state.page = 1; render(); });
+        state.pageSize = Number($('#page-size').value) || 10;
         $('#page-size').addEventListener('change', e => { state.pageSize = Number(e.target.value); state.page = 1; render(); });
         $('.filters-dropdown form').addEventListener('submit', applyFilters);
         $('.filters-reset').addEventListener('click', resetFilters);
@@ -472,9 +531,15 @@
             });
             render();
         });
-        body.addEventListener('change', e => {
-            if (!e.target.matches('.user-select-checkbox'))
-                return; const id = e.target.closest('tr').dataset.userId; e.target.checked ? state.selected.add(id) : state.selected.delete(id); e.target.closest('tr').classList.toggle('selected', e.target.checked); updateSelection();
+        body.addEventListener('change', function (event) {
+            const checkbox = event.target;
+            if (!checkbox.matches('.user-select-checkbox')) return;
+            const row = checkbox.closest('tr');
+            const id = row.dataset.userId;
+            if (checkbox.checked) state.selected.add(id);
+            else state.selected.delete(id);
+            row.classList.toggle('selected', checkbox.checked);
+            updateSelection();
         });
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
@@ -517,16 +582,7 @@
         $$('.user-form, .filters-dropdown form').forEach(function (form) {
             function removeFieldError(event) {
                 const input = event.target;
-                if (!input.matches('input, select'))
-                    return;
-                input.removeAttribute('aria-invalid');
-                input.classList.remove('input-error-field');
-                const stack = input.closest('.input-stack');
-                if (stack) {
-                    const error = stack.querySelector('.input-error');
-                    if (error)
-                        error.remove();
-                }
+                if (input.matches('input, select, textarea')) clearFieldError(input);
             }
             form.addEventListener('input', removeFieldError);
             form.addEventListener('change', removeFieldError);
@@ -537,8 +593,10 @@
                 if (state.busy)
                     return;
                 const modal = close.closest('.modal,.sidebar');
-                if (modal)
+                if (modal) {
                     closeModal(modal.id);
+                    if (modal.querySelector('.confirmation-dialog, .deactivate-dialog, .delete-dialog')) state.pending = null;
+                }
                 else
                     closeDropdowns();
                 return;
