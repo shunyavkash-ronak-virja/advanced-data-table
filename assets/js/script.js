@@ -671,9 +671,51 @@
         $('.datatable').hidden = false;
         renderSkeleton();
         setTimeout(render, 180);
-        $('#searchbar').addEventListener('input', e => { state.search = e.target.value.trim(); state.page = 1; render(); });
-        state.pageSize = Number($('#page-size').value) || 10;
-        $('#page-size').addEventListener('change', e => { state.pageSize = Number(e.target.value); state.page = 1; render(); });
+        $('#searchbar').addEventListener('input', e => {
+            state.search = e.target.value.trim();
+            state.page = 1; render();
+        });
+        const pageSizeSelect = $('#page-size');
+
+        state.pageSize = Number(pageSizeSelect.value) || 10;
+
+        function changePageSize() {
+            const selectedSize = Number(pageSizeSelect.value);
+
+            if (!selectedSize) {
+                return;
+            }
+
+            state.pageSize = selectedSize;
+            state.page = 1;
+            render();
+        }
+
+        // Native select changes (keyboard and normal browser dropdown).
+        pageSizeSelect.addEventListener('change', changePageSize);
+
+        // Nice Select may trigger a jQuery change event without a native event.
+        if (window.jQuery) {
+            window.jQuery(pageSizeSelect).on('change', changePageSize);
+        }
+
+        // Also handle clicks on the visible Nice Select options. Read the
+        // option's data-value directly, so this works even if the plugin
+        // does not dispatch a change event in this project.
+        document.addEventListener('click', function (event) {
+            const option = event.target.closest('.nice-select .option');
+            if (!option || option.classList.contains('disabled')) return;
+
+            const dropdown = option.closest('.nice-select');
+            if (!dropdown || dropdown.previousElementSibling !== pageSizeSelect) return;
+
+            const selectedSize = Number(option.getAttribute('data-value'));
+            if (![10, 25, 50, 100].includes(selectedSize)) return;
+
+            pageSizeSelect.value = String(selectedSize);
+            changePageSize();
+        });
+
         $('.filters-dropdown form').addEventListener('submit', applyFilters);
         $('.filters-reset').addEventListener('click', resetFilters);
         $('.clear-filters').addEventListener('click', resetFilters);
