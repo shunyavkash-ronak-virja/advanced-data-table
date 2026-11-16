@@ -272,6 +272,18 @@
                 $('.empty-state-title', el).textContent = 'No users match these filters';
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
+        // Open dropdown upward for the last two visible rows.
+        const tableRows = body.querySelectorAll('tr');
+
+        tableRows.forEach(function (row, index) {
+            const dropdown = row.querySelector('.row-actions-dropdown');
+
+            if (!dropdown) return;
+
+            if (index >= tableRows.length - 2) {
+                dropdown.classList.add('open-up');
+            }
+        });
         // Keep the pagination summary visible, including the 0-user state.
         const paginationWrapper = $('.pagination-wrapper');
         if (paginationWrapper) {
@@ -385,7 +397,35 @@
         });
         syncBodyScroll();
     }
-    function closeDropdowns() { $$('.toolbar-dropdown-block.show,.row-actions-dropdown.show').forEach(el => el.classList.remove('show')); }
+    function closeDropdowns() {
+        $$('.toolbar-dropdown-block.show, .row-actions-dropdown.show').forEach(function (dropdown) {
+            dropdown.classList.remove('show');
+        });
+        $$('.row-actions-btn[aria-expanded="true"]').forEach(function (button) {
+            button.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    // Keep the dropdown positioned relative to its original row-actions-wrapper.
+    // Flip upward only if the available space below is too small.
+    function positionRowDropdown(button, dropdown) {
+        dropdown.classList.remove('open-up');
+        const menuHeight = dropdown.scrollHeight;
+        const buttonRect = button.getBoundingClientRect();
+        const tableContainer = button.closest('.datatable-outline');
+        let bottomLimit = window.innerHeight;
+
+        if (tableContainer) {
+            const containerRect = tableContainer.getBoundingClientRect();
+            bottomLimit = Math.min(bottomLimit, containerRect.bottom);
+        }
+
+        const spaceBelow = bottomLimit - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        if (spaceBelow < menuHeight + 8 && spaceAbove > spaceBelow) {
+            dropdown.classList.add('open-up');
+        }
+    }
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
     async function operation(button, fn) {
@@ -473,12 +513,23 @@
         }
         state.pending = { action, ids: effective, individual };
         const cfg = ACTIONS[action];
-        const count = effective.length;
+        // The selection count stays the same in every bulk confirmation modal.
+        // Eligible count can differ when some users already have the target status.
+        const selectedCount = individual ? 1 : ids.filter(function (id) { return Boolean(getUser(id)); }).length;
+        const eligibleCount = effective.length;
+        const count = selectedCount;
         const first = getUser(effective[0]);
         const initialId = individual ? (action === 'delete' ? 'row-action-delete' : 'row-action-deactivate') : (action === 'activate' ? 'activate' : action === 'deactivate' ? 'bulk-action-deactivate' : 'delete');
         const modal = $(`#${initialId}`);
         $('.actions-modal-title', modal).textContent = individual ? `${action === 'delete' ? 'Delete' : action === 'activate' ? 'Activate' : 'Deactivate'} user?` : cfg.title;
-        $('.actions-modal-description', modal).textContent = individual ? `Are you sure you want to ${cfg.verb} ${first.name}?${action === 'delete' ? ' This action cannot be undone.' : ''}` : `Are you sure you want to ${cfg.verb} ${count} selected user${count === 1 ? '' : 's'}?${action === 'delete' ? ' This action cannot be undone.' : ''}`;
+        if (individual) {
+            $('.actions-modal-description', modal).textContent = `Are you sure you want to ${cfg.verb} ${first.name}?${action === 'delete' ? ' This action cannot be undone.' : ''}`;
+        } else {
+            let description = `${count} user${count === 1 ? '' : 's'} selected. `;
+            description += `${eligibleCount} user${eligibleCount === 1 ? ' is' : 's are'} eligible to ${cfg.verb}.`;
+            if (action === 'delete') description += ' This action cannot be undone.';
+            $('.actions-modal-description', modal).textContent = description;
+        }
         $$('.actions-user-value', modal).forEach(el => el.textContent = count);
         const caption = $('.actions-caption-value', modal);
         if (caption)
@@ -663,15 +714,21 @@
 
             updateSelection();
         });
+        window.addEventListener('resize', closeDropdowns);
+        window.addEventListener('scroll', closeDropdowns, true);
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
             if (toggle) {
                 e.stopPropagation();
-                const dropdown = $('.row-actions-dropdown', toggle.parentElement);
-                const was = dropdown.classList.contains('show');
+
+                const dropdown = toggle.parentElement.querySelector('.row-actions-dropdown');
+                const wasOpen = dropdown.classList.contains('show');
+
                 closeDropdowns();
-                dropdown.classList.toggle('show', !was);
-                toggle.setAttribute('aria-expanded', String(!was));
+
+                dropdown.classList.toggle('show', !wasOpen);
+                toggle.setAttribute('aria-expanded', String(!wasOpen));
+
                 return;
             }
             const action = e.target.closest('[data-row-action]');

@@ -584,6 +584,13 @@
   transform: scale(1);
 }
 
+.row-actions-dropdown.open-up {
+  top: auto;
+  bottom: 100%;
+  padding-top: 0;
+  padding-bottom: 6px;
+}
+
 .row-actions-stack {
   width: 100%;
   min-width: 190px;
@@ -696,6 +703,10 @@
   padding: 6px;
   border-radius: 6px;
   gap: 10px;
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .page-size .list::-webkit-scrollbar {
