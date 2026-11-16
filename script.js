@@ -1,14 +1,3 @@
-/*
- * USER MANAGEMENT - readable sections
- * 1. Data and helpers
- * 2. Table rows and badges
- * 3. Pagination and selection
- * 4. Validation and forms
- * 5. Modals and user actions
- * 6. Search, filters, sorting and event listeners
- *
- * To connect a backend later, replace load() and persist().
- */
 (() => {
     'use strict';
     const $ = (selector, root = document) => root.querySelector(selector);
@@ -19,7 +8,7 @@
     const statuses = ['active', 'pending', 'suspended', 'invited'];
     const names = ['Sofia Bennett', 'Daniel Kim', 'Maya Patel', 'Oliver Johnson', 'Ava Williams', 'Noah Brown', 'Emma Davis', 'Liam Wilson', 'Isabella Moore', 'Ethan Taylor', 'Amelia Anderson', 'Lucas Thomas', 'Mia Jackson', 'James White', 'Charlotte Harris', 'Benjamin Martin', 'Harper Thompson', 'Henry Garcia', 'Ella Martinez', 'Alexander Robinson', 'Grace Clark', 'Michael Rodriguez', 'Chloe Lewis', 'William Lee', 'Zoe Walker', 'Elijah Hall', 'Aria Allen', 'Logan Young', 'Lily King', 'Jack Wright', 'Nora Scott', 'Samuel Green', 'Emily Baker', 'David Adams', 'Ruby Nelson', 'Jacob Carter', 'Hannah Mitchell', 'Leo Perez', 'Sarah Roberts', 'Nathan Turner', 'Aiden Phillips', 'Olivia Campbell', 'Ryan Parker', 'Layla Evans', 'Aaron Edwards', 'Eva Collins', 'Owen Stewart', 'Alice Morris', 'Isaac Rogers', 'Leah Reed'];
     const label = (v, options) => options.find(o => o.value === v)?.label || (v ? v.charAt(0).toUpperCase() + v.slice(1) : '');
-    const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const uid = () => window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const normalizeEmail = v => v.trim().toLowerCase();
     function validDate(value) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
@@ -66,6 +55,33 @@
             return samples();
         }
     }
+    // Activity is stored separately so existing user records remain compatible.
+    const ACTIVITY_KEY = KEY + '-activity';
+    let activityHistory = {};
+    try {
+        activityHistory = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '{}');
+        if (!activityHistory || typeof activityHistory !== 'object' || Array.isArray(activityHistory)) activityHistory = {};
+    } catch (error) {
+        activityHistory = {};
+    }
+
+    function recordActivity(userId, title, description) {
+        if (!activityHistory[userId]) activityHistory[userId] = [];
+        activityHistory[userId].unshift({
+            title: title,
+            description: description,
+            time: new Date().toISOString()
+        });
+        activityHistory[userId] = activityHistory[userId].slice(0, 20);
+        localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activityHistory));
+    }
+
+    function activityDate(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
     let users = load();
     const state = { search: '', filters: {}, sort: 'name-asc', page: 1, pageSize: 10, selected: new Set(), editId: null, detailId: null, pending: null, busy: false, retry: null };
     const body = $('.datatable-body');
@@ -83,7 +99,13 @@
         return filtered.sort((a, b) => { const av = field === 'department' ? label(a.department, departments) : a.name; const bv = field === 'department' ? label(b.department, departments) : b.name; const cmp = av.localeCompare(bv, undefined, { sensitivity: 'base' }); return (direction === 'desc' ? -cmp : cmp) || a.id.localeCompare(b.id); });
     }
     const visiblePage = rows => rows.slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
-    function setBadge(el, text, color) { el.textContent = text; el.className = `badge ${color}`; }
+    function setBadge(el, text, color) {
+        // Keep original badge-small and other layout classes. Only replace background colors.
+        const colors = ['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'];
+        el.classList.remove(...colors);
+        el.classList.add(color);
+        el.textContent = text;
+    }
     function renderRow(user) {
         const tr = rowTemplate.content.firstElementChild.cloneNode(true);
         tr.dataset.userId = user.id;
@@ -119,21 +141,34 @@
         });
         return result;
     }
-    // Keep the original pagination SVG icon from index.html.
+    // Save the original pagination icons before rebuilding any buttons.
+    // The HTML's SVGs are reused; no replacement icon design is introduced.
+    const originalPagination = $('.pagination');
+    const originalArrowButtons = originalPagination ?
+        [...originalPagination.querySelectorAll('button')].filter(button => button.querySelector('svg')) : [];
+    const originalPreviousIcon = originalArrowButtons.length ? originalArrowButtons[0].querySelector('svg').cloneNode(true) : null;
+    const originalNextIcon = originalArrowButtons.length ? originalArrowButtons[originalArrowButtons.length - 1].querySelector('svg').cloneNode(true) : null;
+
     function makeArrow(direction, disabled) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'pagination-btn pagination-arrow';
         button.disabled = disabled;
-        if (disabled)
-            button.classList.add('disabled');
+        if (disabled) button.classList.add('disabled');
         button.setAttribute('aria-label', direction === 'previous' ? 'Previous page' : 'Next page');
-        const iconTemplate = document.getElementById('pagination-arrow-template');
-        const icon = iconTemplate.content.firstElementChild.cloneNode(true);
-        if (direction === 'previous')
-            icon.style.transform = 'rotate(180deg)';
-        button.appendChild(icon);
+
+        let icon = direction === 'previous' ? originalPreviousIcon : originalNextIcon;
+        if (icon) icon = icon.cloneNode(true);
+        if (!icon) {
+            const template = document.getElementById('pagination-arrow-template');
+            if (template && template.content && template.content.firstElementChild) {
+                icon = template.content.firstElementChild.cloneNode(true);
+                if (direction === 'previous') icon.style.transform = 'rotate(180deg)';
+            }
+        }
+        if (icon) button.appendChild(icon);
         button.addEventListener('click', function () {
+            if (disabled) return;
             state.page += direction === 'previous' ? -1 : 1;
             render();
         });
@@ -157,10 +192,16 @@
         const start = count === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
         const end = Math.min(state.page * state.pageSize, count);
         // Only update the two spans in your pagination-info HTML.
-        $('.perpage-user-list').textContent = start + ' – ' + end;
-        $('.total-user-value').textContent = count;
+        const range = $('.perpage-user-list');
+        const total = $('.total-user-value');
+        if (range) range.textContent = start + ' – ' + end;
+        if (total) total.textContent = count;
         const host = $('.pagination');
+        if (!host) return;
+        // Keep any HTML template outside the rebuilt button area.
+        const preservedTemplates = [...host.querySelectorAll('template')];
         host.replaceChildren();
+        preservedTemplates.forEach(template => host.appendChild(template));
         host.appendChild(makeArrow('previous', state.page === 1));
         const visiblePages = pageWindow(pages);
         visiblePages.forEach(function (page) {
@@ -176,17 +217,41 @@
         });
         host.appendChild(makeArrow('next', state.page === pages));
     }
+    // One source of truth: state.selected stores the IDs of selected users.
     function updateSelection() {
-        for (const id of [...state.selected])
-            if (!getUser(id))
-                state.selected.delete(id);
-        const checks = $$('.user-select-checkbox', body);
-        const checked = checks.filter(c => c.checked).length;
-        const all = $('#check-all');
-        all.checked = checks.length > 0 && checked === checks.length;
-        all.indeterminate = checked > 0 && checked < checks.length;
-        $('.bulk-actions-wrapper').classList.toggle('show', state.selected.size > 0);
-        $('.bulk-actions-counter').textContent = `${state.selected.size} user${state.selected.size === 1 ? '' : 's'} selected`;
+        // Remove IDs that no longer exist.
+        state.selected.forEach(function (id) {
+            if (!getUser(id)) state.selected.delete(id);
+        });
+
+        const rowCheckboxes = $$('.user-select-checkbox', body);
+        let selectedOnPage = 0;
+
+        rowCheckboxes.forEach(function (checkbox) {
+            const row = checkbox.closest('tr');
+            const selected = state.selected.has(row.dataset.userId);
+            checkbox.checked = selected;
+            row.classList.toggle('selected', selected);
+            if (selected) selectedOnPage++;
+        });
+
+        const checkAll = $('#check-all');
+        if (checkAll) {
+            checkAll.checked = rowCheckboxes.length > 0 && selectedOnPage === rowCheckboxes.length;
+            checkAll.indeterminate = selectedOnPage > 0 && selectedOnPage < rowCheckboxes.length;
+        }
+
+        const count = state.selected.size;
+        const toolbar = $('.bulk-actions-wrapper');
+        if (toolbar) {
+            toolbar.hidden = count === 0 ? true : false;
+            toolbar.classList.toggle('show', count > 0);
+        }
+
+        const counter = $('.bulk-actions-counter');
+        if (counter) {
+            counter.textContent = count + (count === 1 ? ' user selected' : ' users selected');
+        }
     }
     function render() {
         const rows = results();
@@ -207,21 +272,65 @@
                 $('.empty-state-title', el).textContent = 'No users match these filters';
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
-        $('.pagination-wrapper').hidden = empty;
+        // Keep the pagination summary visible, including the 0-user state.
+        const paginationWrapper = $('.pagination-wrapper');
+        if (paginationWrapper) {
+            paginationWrapper.hidden = false;
+            paginationWrapper.style.removeProperty('display');
+        }
+        const paginationHost = $('.pagination');
+        if (paginationHost) {
+            paginationHost.hidden = false;
+            paginationHost.style.removeProperty('display');
+        }
         renderPagination(rows.length);
         updateSelection();
         if (state.detailId && getUser(state.detailId))
             renderDetails(getUser(state.detailId));
     }
     function syncSelect(select) {
-        if (window.jQuery && window.jQuery.fn.niceSelect)
+        if (window.jQuery && window.jQuery.fn.niceSelect) {
             window.jQuery(select).niceSelect('update');
+        }
     }
     function formFields(prefix) { return { name: $(`#${prefix}-name`), email: $(`#${prefix}-email`), department: $(`#${prefix}-department`), role: $(`#${prefix}-role`), status: $(`#${prefix}-status`), createdDate: $(`#${prefix}-registration-date`) }; }
-    function clearErrors(form) { $$('.input-error', form).forEach(x => x.remove()); $$('[aria-invalid]', form).forEach(x => { x.removeAttribute('aria-invalid'); x.classList.remove('input-error-field'); }); }
-    function fieldError(el, message) {
-        el.setAttribute('aria-invalid', 'true'); const p = document.createElement('span'); p.className = 'input-error'; p.textContent = message; const stack = el.closest('.input-stack'); if (stack)
-            stack.append(p); el.classList.add('input-error-field');
+    function clearFieldError(input) {
+        input.removeAttribute('aria-invalid');
+        input.classList.remove('input-error-field');
+        const stack = input.closest('.input-stack');
+        if (stack) {
+            const message = stack.querySelector('.input-error');
+            if (message) message.remove();
+        }
+        if (input.tagName === 'SELECT') {
+            const nice = input.nextElementSibling;
+            if (nice && nice.classList.contains('nice-select')) {
+                nice.removeAttribute('aria-invalid');
+                nice.classList.remove('input-error-field');
+            }
+        }
+    }
+    function clearErrors(form) {
+        $$('input, select, textarea', form).forEach(clearFieldError);
+    }
+    function fieldError(input, message) {
+        clearFieldError(input);
+        input.setAttribute('aria-invalid', 'true');
+        input.classList.add('input-error-field');
+        if (input.tagName === 'SELECT') {
+            const nice = input.nextElementSibling;
+            if (nice && nice.classList.contains('nice-select')) {
+                nice.setAttribute('aria-invalid', 'true');
+                nice.classList.add('input-error-field');
+            }
+        }
+        const stack = input.closest('.input-stack');
+        if (stack) {
+            const text = document.createElement('span');
+            text.className = 'input-error';
+            text.textContent = message;
+            stack.appendChild(text);
+        }
     }
     function validate(fields, excludeId) {
         const data = Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value.trim()]));
@@ -257,17 +366,25 @@
         document.body.classList.add('body-hidden');
         requestAnimationFrame(() => { const focus = $('input:not([type=hidden]),button', modal); focus?.focus(); });
     }
+    function syncBodyScroll() {
+        const open = document.querySelector('.modal.active, .sidebar.active');
+        document.body.classList.toggle('body-hidden', Boolean(open));
+    }
     function closeModal(id) {
         const modal = document.getElementById(id);
-        if (!modal)
-            return;
+        if (!modal) return;
         modal.classList.remove('active');
-        if (!$('.modal.active, .sidebar.active'))
-            document.body.classList.remove('body-hidden');
-        if (modal._previousFocus?.isConnected)
+        syncBodyScroll();
+        if (modal._previousFocus && modal._previousFocus.isConnected) {
             modal._previousFocus.focus();
+        }
     }
-    function closeAll() { $$('.modal.active,.sidebar.active').forEach(el => closeModal(el.id)); }
+    function closeAll() {
+        $$('.modal.active, .sidebar.active').forEach(function (modal) {
+            modal.classList.remove('active');
+        });
+        syncBodyScroll();
+    }
     function closeDropdowns() { $$('.toolbar-dropdown-block.show,.row-actions-dropdown.show').forEach(el => el.classList.remove('show')); }
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
@@ -306,8 +423,7 @@
         const u = id ? getUser(id) : null;
         if (u)
             Object.entries(fields).forEach(([k, el]) => { el.value = u[k]; });
-        else
-            fields.createdDate.value = today();
+        // New user fields start empty, including the required registration date.
         Object.values(fields).filter(el => el.tagName === 'SELECT').forEach(syncSelect);
         openModal(prefix);
     }
@@ -324,10 +440,19 @@
             if (mode === 'edit') {
                 if (!getUser(state.editId))
                     throw Error('This user no longer exists.');
+                const previousUser = getUser(state.editId);
                 persist(users.map(u => u.id === state.editId ? { ...u, ...data } : u));
+                recordActivity(state.editId, 'Updated profile', 'User details were updated.');
+                if (previousUser.department !== data.department) {
+                    recordActivity(state.editId, 'Changed department',
+                        label(previousUser.department, departments) + ' to ' + label(data.department, departments));
+                }
             }
-            else
-                persist([...users, { id: uid(), ...data }]);
+            else {
+                const newId = uid();
+                persist([...users, { id: newId, ...data }]);
+                recordActivity(newId, 'Account created', 'User account was created.');
+            }
             state.page = 1;
             render();
             form.reset();
@@ -339,11 +464,11 @@
         deactivate: { verb: 'deactivate', past: 'deactivated', title: 'Deactivate Selected Users', success: 'Users Deactivated' },
         delete: { verb: 'delete', past: 'deleted', title: 'Delete Selected Users', success: 'Users Deleted' }
     };
-    function actionIds(ids, action) { return ids.filter(id => { const u = getUser(id); return u && (action === 'delete' || (action === 'activate' ? u.status !== 'active' : u.status === 'active')); }); }
+    function actionIds(ids, action) { return ids.filter(id => { const u = getUser(id); return u && (action === 'delete' || (action === 'activate' ? u.status !== 'active' : u.status !== 'suspended')); }); }
     function beginAction(action, ids, individual = false) {
         const effective = actionIds(ids, action);
         if (!effective.length) {
-            showError('No changes needed', 'No selected users require this action.');
+            showError('No eligible users', 'Select at least one user who can be ' + ACTIONS[action].past + '.');
             return;
         }
         state.pending = { action, ids: effective, individual };
@@ -394,7 +519,8 @@
         let avatarNumber = 0;
         for (let i = 0; i < u.name.length; i++)
             avatarNumber += u.name.charCodeAt(i);
-        sidebarAvatar.className = 'sidebar-author-profile ' + ['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'][avatarNumber % 6];
+        sidebarAvatar.classList.remove('bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey');
+        sidebarAvatar.classList.add(['bg-purple', 'bg-blue', 'bg-green', 'bg-beige', 'bg-red', 'bg-grey'][avatarNumber % 6]);
         $('.sidebar-user-name', root).textContent = u.name;
         $('.sidebar-user-email', root).textContent = u.email;
         const badges = $$('.user-status-wrapper .badge', root);
@@ -405,18 +531,33 @@
         setBadge(badges[0], label(u.department, departments), deptColor);
         setBadge(badges[1], label(u.role, []), roleColor);
         setBadge(badges[2], label(u.status, []), statusColor);
-        const list = $('.recent-activity-list', root);
-        list.replaceChildren();
-        const li = document.createElement('li');
-        li.className = 'recent-activity-item';
-        const title = document.createElement('p');
-        title.className = 'activity-title';
-        title.textContent = 'Account created';
-        const date = document.createElement('span');
-        date.className = 'text-secondary activity-caption';
-        date.textContent = dateLabel(u.createdDate);
-        li.append(title, date);
-        list.append(li);
+        // Keep the original sidebar activity item HTML, icons and CSS classes.
+        const activityList = $('.recent-activity-list', root);
+        if (!activityList) return;
+        const existingItems = $$('.recent-activity-item', activityList);
+        if (!existingItems.length) return;
+
+        // A user creation event exists even for older demo records.
+        const history = (activityHistory[u.id] || []).slice();
+        if (!history.some(item => item.title === 'Account created')) {
+            history.push({ title: 'Account created', description: 'User account was created.', time: u.createdDate + 'T12:00:00' });
+        }
+        history.sort(function (a, b) { return new Date(b.time) - new Date(a.time); });
+
+        // Preserve each original activity row and its icon instead of rebuilding its layout.
+        // For longer histories, clone existing rows and retain all their classes.
+        const templates = existingItems.map(item => item.cloneNode(true));
+        activityList.replaceChildren();
+        history.forEach(function (entry, index) {
+            const item = templates[Math.min(index, templates.length - 1)].cloneNode(true);
+            const heading = item.querySelector('.activity-title, .recent-activity-name, .activity-name, h3, h4, h5, strong');
+            const description = item.querySelector('.activity-description, .activity-text, .recent-activity-description, p');
+            const caption = item.querySelector('.activity-caption, .activity-date, time');
+            if (heading) heading.textContent = entry.title;
+            if (description) description.textContent = entry.description;
+            if (caption) caption.textContent = activityDate(entry.time);
+            activityList.appendChild(item);
+        });
     }
     function resetFilters() {
         const form = $('.filters-dropdown form');
@@ -456,36 +597,71 @@
         }));
     }
     function init() {
+        // Apply the same red error border to text inputs and Nice Select controls.
+        const validationStyle = document.createElement('style');
+        validationStyle.textContent = `
+            .input-field[aria-invalid="true"],
+            .nice-select[aria-invalid="true"],
+            .nice-select.input-error-field {
+                border-color: var(--red) !important;
+            }
+        `;
+        document.head.appendChild(validationStyle);
+        // The original HTML places bulk modals inside the toolbar.
+        // Move only the modal elements (not their icons or contents) outside
+        // the hidden toolbar so they can open independently.
+        $$('.bulk-actions-wrapper > .bulk-actions > .modal, .bulk-actions-wrapper .modal').forEach(function (modal) {
+            document.body.appendChild(modal);
+        });
         $$('.user-form, .filters-dropdown form').forEach(form => form.noValidate = true);
         if (window.jQuery && window.jQuery.fn.niceSelect) {
-            window.jQuery('select:not(#page-size)').niceSelect();
+            window.jQuery('select').niceSelect();
         }
         $('.datatable').hidden = false;
         renderSkeleton();
         setTimeout(render, 180);
         $('#searchbar').addEventListener('input', e => { state.search = e.target.value.trim(); state.page = 1; render(); });
+        state.pageSize = Number($('#page-size').value) || 10;
         $('#page-size').addEventListener('change', e => { state.pageSize = Number(e.target.value); state.page = 1; render(); });
         $('.filters-dropdown form').addEventListener('submit', applyFilters);
         $('.filters-reset').addEventListener('click', resetFilters);
         $('.clear-filters').addEventListener('click', resetFilters);
         $$('.sorting-option').forEach((btn, i) => btn.addEventListener('click', () => { state.sort = ['name-asc', 'name-desc', 'department-asc', 'department-desc'][i]; $$('.sorting-option').forEach(b => b.classList.toggle('active', b === btn)); closeDropdowns(); render(); }));
-        $('#check-all').setAttribute('aria-label', 'Select all users on current page');
-        $('#check-all').addEventListener('change', function (event) {
-            const currentUsers = visiblePage(results());
-            const isChecked = event.target.checked;
-            currentUsers.forEach(function (user) {
-                if (isChecked) {
+        const selectAllCheckbox = $('#check-all');
+        selectAllCheckbox.setAttribute('aria-label', 'Select all users on current page');
+
+        // Select/deselect every row on the current page.
+        selectAllCheckbox.addEventListener('change', function () {
+            const pageUsers = visiblePage(results());
+            const shouldSelect = selectAllCheckbox.checked;
+
+            pageUsers.forEach(function (user) {
+                if (shouldSelect) {
                     state.selected.add(user.id);
-                }
-                else {
+                } else {
                     state.selected.delete(user.id);
                 }
             });
-            render();
+
+            updateSelection();
         });
-        body.addEventListener('change', e => {
-            if (!e.target.matches('.user-select-checkbox'))
-                return; const id = e.target.closest('tr').dataset.userId; e.target.checked ? state.selected.add(id) : state.selected.delete(id); e.target.closest('tr').classList.toggle('selected', e.target.checked); updateSelection();
+
+        // Individual checkbox changes use the same selected-ID set.
+        body.addEventListener('change', function (event) {
+            const checkbox = event.target;
+            if (!checkbox.matches('.user-select-checkbox')) return;
+
+            const row = checkbox.closest('tr');
+            if (!row) return;
+            const id = row.dataset.userId;
+
+            if (checkbox.checked) {
+                state.selected.add(id);
+            } else {
+                state.selected.delete(id);
+            }
+
+            updateSelection();
         });
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
@@ -528,19 +704,25 @@
         $$('.user-form, .filters-dropdown form').forEach(function (form) {
             function removeFieldError(event) {
                 const input = event.target;
-                if (!input.matches('input, select'))
-                    return;
-                input.removeAttribute('aria-invalid');
-                input.classList.remove('input-error-field');
-                const stack = input.closest('.input-stack');
-                if (stack) {
-                    const error = stack.querySelector('.input-error');
-                    if (error)
-                        error.remove();
-                }
+                if (input.matches('input, select, textarea')) clearFieldError(input);
             }
             form.addEventListener('input', removeFieldError);
             form.addEventListener('change', removeFieldError);
+
+            // Nice Select renders a separate clickable list, not a native select box.
+            // Clear the error after the plugin updates the original select value.
+            form.addEventListener('click', function (event) {
+                const option = event.target.closest('.nice-select .option');
+                if (!option || option.classList.contains('disabled')) return;
+
+                const dropdown = option.closest('.nice-select');
+                const select = dropdown.previousElementSibling;
+                if (!select || select.tagName !== 'SELECT') return;
+
+                setTimeout(function () {
+                    if (select.value) clearFieldError(select);
+                }, 0);
+            });
         });
         document.addEventListener('click', e => {
             const close = e.target.closest('.modal-close,.sidebar-close,.filters-close');
@@ -548,8 +730,10 @@
                 if (state.busy)
                     return;
                 const modal = close.closest('.modal,.sidebar');
-                if (modal)
+                if (modal) {
                     closeModal(modal.id);
+                    if (modal.querySelector('.confirmation-dialog, .deactivate-dialog, .delete-dialog')) state.pending = null;
+                }
                 else
                     closeDropdowns();
                 return;
@@ -630,7 +814,7 @@
         });
         window.resetUserTableDemo = () => {
             if (!confirm('Reset all locally saved demo users?'))
-                return; persist(samples()); state.selected.clear(); state.filters = {}; state.search = ''; state.page = 1; $('#searchbar').value = ''; resetFilters(); render();
+                return; persist(samples()); activityHistory = {}; localStorage.removeItem(ACTIVITY_KEY); state.selected.clear(); state.filters = {}; state.search = ''; state.page = 1; $('#searchbar').value = ''; resetFilters(); render();
         };
     }
     if (document.readyState === 'loading')

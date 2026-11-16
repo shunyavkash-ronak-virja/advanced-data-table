@@ -55,6 +55,33 @@
             return samples();
         }
     }
+    // Activity is stored separately so existing user records remain compatible.
+    const ACTIVITY_KEY = KEY + '-activity';
+    let activityHistory = {};
+    try {
+        activityHistory = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '{}');
+        if (!activityHistory || typeof activityHistory !== 'object' || Array.isArray(activityHistory)) activityHistory = {};
+    } catch (error) {
+        activityHistory = {};
+    }
+
+    function recordActivity(userId, title, description) {
+        if (!activityHistory[userId]) activityHistory[userId] = [];
+        activityHistory[userId].unshift({
+            title: title,
+            description: description,
+            time: new Date().toISOString()
+        });
+        activityHistory[userId] = activityHistory[userId].slice(0, 20);
+        localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activityHistory));
+    }
+
+    function activityDate(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
     let users = load();
     const state = { search: '', filters: {}, sort: 'name-asc', page: 1, pageSize: 10, selected: new Set(), editId: null, detailId: null, pending: null, busy: false, retry: null };
     const body = $('.datatable-body');
@@ -114,21 +141,34 @@
         });
         return result;
     }
-    // Keep the original pagination SVG icon from index.html.
+    // Save the original pagination icons before rebuilding any buttons.
+    // The HTML's SVGs are reused; no replacement icon design is introduced.
+    const originalPagination = $('.pagination');
+    const originalArrowButtons = originalPagination ?
+        [...originalPagination.querySelectorAll('button')].filter(button => button.querySelector('svg')) : [];
+    const originalPreviousIcon = originalArrowButtons.length ? originalArrowButtons[0].querySelector('svg').cloneNode(true) : null;
+    const originalNextIcon = originalArrowButtons.length ? originalArrowButtons[originalArrowButtons.length - 1].querySelector('svg').cloneNode(true) : null;
+
     function makeArrow(direction, disabled) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'pagination-btn pagination-arrow';
         button.disabled = disabled;
-        if (disabled)
-            button.classList.add('disabled');
+        if (disabled) button.classList.add('disabled');
         button.setAttribute('aria-label', direction === 'previous' ? 'Previous page' : 'Next page');
-        const iconTemplate = document.getElementById('pagination-arrow-template');
-        const icon = iconTemplate.content.firstElementChild.cloneNode(true);
-        if (direction === 'previous')
-            icon.style.transform = 'rotate(180deg)';
-        button.appendChild(icon);
+
+        let icon = direction === 'previous' ? originalPreviousIcon : originalNextIcon;
+        if (icon) icon = icon.cloneNode(true);
+        if (!icon) {
+            const template = document.getElementById('pagination-arrow-template');
+            if (template && template.content && template.content.firstElementChild) {
+                icon = template.content.firstElementChild.cloneNode(true);
+                if (direction === 'previous') icon.style.transform = 'rotate(180deg)';
+            }
+        }
+        if (icon) button.appendChild(icon);
         button.addEventListener('click', function () {
+            if (disabled) return;
             state.page += direction === 'previous' ? -1 : 1;
             render();
         });
@@ -152,10 +192,16 @@
         const start = count === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
         const end = Math.min(state.page * state.pageSize, count);
         // Only update the two spans in your pagination-info HTML.
-        $('.perpage-user-list').textContent = start + ' – ' + end;
-        $('.total-user-value').textContent = count;
+        const range = $('.perpage-user-list');
+        const total = $('.total-user-value');
+        if (range) range.textContent = start + ' – ' + end;
+        if (total) total.textContent = count;
         const host = $('.pagination');
+        if (!host) return;
+        // Keep any HTML template outside the rebuilt button area.
+        const preservedTemplates = [...host.querySelectorAll('template')];
         host.replaceChildren();
+        preservedTemplates.forEach(template => host.appendChild(template));
         host.appendChild(makeArrow('previous', state.page === 1));
         const visiblePages = pageWindow(pages);
         visiblePages.forEach(function (page) {
@@ -171,24 +217,41 @@
         });
         host.appendChild(makeArrow('next', state.page === pages));
     }
+    // One source of truth: state.selected stores the IDs of selected users.
     function updateSelection() {
-        // Remove deleted users from selection.
-        for (const id of [...state.selected]) {
+        // Remove IDs that no longer exist.
+        state.selected.forEach(function (id) {
             if (!getUser(id)) state.selected.delete(id);
-        }
-        const checkboxes = $$('.user-select-checkbox', body);
-        let checkedCount = 0;
-        checkboxes.forEach(function (checkbox) {
-            if (checkbox.checked) checkedCount++;
         });
+
+        const rowCheckboxes = $$('.user-select-checkbox', body);
+        let selectedOnPage = 0;
+
+        rowCheckboxes.forEach(function (checkbox) {
+            const row = checkbox.closest('tr');
+            const selected = state.selected.has(row.dataset.userId);
+            checkbox.checked = selected;
+            row.classList.toggle('selected', selected);
+            if (selected) selectedOnPage++;
+        });
+
         const checkAll = $('#check-all');
-        checkAll.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
-        checkAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        if (checkAll) {
+            checkAll.checked = rowCheckboxes.length > 0 && selectedOnPage === rowCheckboxes.length;
+            checkAll.indeterminate = selectedOnPage > 0 && selectedOnPage < rowCheckboxes.length;
+        }
+
         const count = state.selected.size;
-        const bulkToolbar = $('.bulk-actions-wrapper');
-        bulkToolbar.classList.toggle('show', count > 0);
-        bulkToolbar.hidden = count === 0;
-        $('.bulk-actions-counter').textContent = count + (count === 1 ? ' user selected' : ' users selected');
+        const toolbar = $('.bulk-actions-wrapper');
+        if (toolbar) {
+            toolbar.hidden = count === 0 ? true : false;
+            toolbar.classList.toggle('show', count > 0);
+        }
+
+        const counter = $('.bulk-actions-counter');
+        if (counter) {
+            counter.textContent = count + (count === 1 ? ' user selected' : ' users selected');
+        }
     }
     function render() {
         const rows = results();
@@ -210,7 +273,16 @@
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
         // Keep the pagination summary visible, including the 0-user state.
-        $('.pagination-wrapper').hidden = false;
+        const paginationWrapper = $('.pagination-wrapper');
+        if (paginationWrapper) {
+            paginationWrapper.hidden = false;
+            paginationWrapper.style.removeProperty('display');
+        }
+        const paginationHost = $('.pagination');
+        if (paginationHost) {
+            paginationHost.hidden = false;
+            paginationHost.style.removeProperty('display');
+        }
         renderPagination(rows.length);
         updateSelection();
         if (state.detailId && getUser(state.detailId))
@@ -368,10 +440,19 @@
             if (mode === 'edit') {
                 if (!getUser(state.editId))
                     throw Error('This user no longer exists.');
+                const previousUser = getUser(state.editId);
                 persist(users.map(u => u.id === state.editId ? { ...u, ...data } : u));
+                recordActivity(state.editId, 'Updated profile', 'User details were updated.');
+                if (previousUser.department !== data.department) {
+                    recordActivity(state.editId, 'Changed department',
+                        label(previousUser.department, departments) + ' to ' + label(data.department, departments));
+                }
             }
-            else
-                persist([...users, { id: uid(), ...data }]);
+            else {
+                const newId = uid();
+                persist([...users, { id: newId, ...data }]);
+                recordActivity(newId, 'Account created', 'User account was created.');
+            }
             state.page = 1;
             render();
             form.reset();
@@ -450,14 +531,33 @@
         setBadge(badges[0], label(u.department, departments), deptColor);
         setBadge(badges[1], label(u.role, []), roleColor);
         setBadge(badges[2], label(u.status, []), statusColor);
-        // Keep the sidebar's original activity markup and classes intact.
+        // Keep the original sidebar activity item HTML, icons and CSS classes.
         const activityList = $('.recent-activity-list', root);
-        const items = $$('.recent-activity-item', activityList);
-        if (items.length) {
-            const lastItem = items[items.length - 1];
-            const caption = $('.activity-caption', lastItem);
-            if (caption) caption.textContent = dateLabel(u.createdDate);
+        if (!activityList) return;
+        const existingItems = $$('.recent-activity-item', activityList);
+        if (!existingItems.length) return;
+
+        // A user creation event exists even for older demo records.
+        const history = (activityHistory[u.id] || []).slice();
+        if (!history.some(item => item.title === 'Account created')) {
+            history.push({ title: 'Account created', description: 'User account was created.', time: u.createdDate + 'T12:00:00' });
         }
+        history.sort(function (a, b) { return new Date(b.time) - new Date(a.time); });
+
+        // Preserve each original activity row and its icon instead of rebuilding its layout.
+        // For longer histories, clone existing rows and retain all their classes.
+        const templates = existingItems.map(item => item.cloneNode(true));
+        activityList.replaceChildren();
+        history.forEach(function (entry, index) {
+            const item = templates[Math.min(index, templates.length - 1)].cloneNode(true);
+            const heading = item.querySelector('.activity-title, .recent-activity-name, .activity-name, h3, h4, h5, strong');
+            const description = item.querySelector('.activity-description, .activity-text, .recent-activity-description, p');
+            const caption = item.querySelector('.activity-caption, .activity-date, time');
+            if (heading) heading.textContent = entry.title;
+            if (description) description.textContent = entry.description;
+            if (caption) caption.textContent = activityDate(entry.time);
+            activityList.appendChild(item);
+        });
     }
     function resetFilters() {
         const form = $('.filters-dropdown form');
@@ -497,6 +597,16 @@
         }));
     }
     function init() {
+        // Apply the same red error border to text inputs and Nice Select controls.
+        const validationStyle = document.createElement('style');
+        validationStyle.textContent = `
+            .input-field[aria-invalid="true"],
+            .nice-select[aria-invalid="true"],
+            .nice-select.input-error-field {
+                border-color: var(--red) !important;
+            }
+        `;
+        document.head.appendChild(validationStyle);
         // The original HTML places bulk modals inside the toolbar.
         // Move only the modal elements (not their icons or contents) outside
         // the hidden toolbar so they can open independently.
@@ -517,28 +627,40 @@
         $('.filters-reset').addEventListener('click', resetFilters);
         $('.clear-filters').addEventListener('click', resetFilters);
         $$('.sorting-option').forEach((btn, i) => btn.addEventListener('click', () => { state.sort = ['name-asc', 'name-desc', 'department-asc', 'department-desc'][i]; $$('.sorting-option').forEach(b => b.classList.toggle('active', b === btn)); closeDropdowns(); render(); }));
-        $('#check-all').setAttribute('aria-label', 'Select all users on current page');
-        $('#check-all').addEventListener('change', function (event) {
-            const currentUsers = visiblePage(results());
-            const isChecked = event.target.checked;
-            currentUsers.forEach(function (user) {
-                if (isChecked) {
+        const selectAllCheckbox = $('#check-all');
+        selectAllCheckbox.setAttribute('aria-label', 'Select all users on current page');
+
+        // Select/deselect every row on the current page.
+        selectAllCheckbox.addEventListener('change', function () {
+            const pageUsers = visiblePage(results());
+            const shouldSelect = selectAllCheckbox.checked;
+
+            pageUsers.forEach(function (user) {
+                if (shouldSelect) {
                     state.selected.add(user.id);
-                }
-                else {
+                } else {
                     state.selected.delete(user.id);
                 }
             });
-            render();
+
+            updateSelection();
         });
+
+        // Individual checkbox changes use the same selected-ID set.
         body.addEventListener('change', function (event) {
             const checkbox = event.target;
             if (!checkbox.matches('.user-select-checkbox')) return;
+
             const row = checkbox.closest('tr');
+            if (!row) return;
             const id = row.dataset.userId;
-            if (checkbox.checked) state.selected.add(id);
-            else state.selected.delete(id);
-            row.classList.toggle('selected', checkbox.checked);
+
+            if (checkbox.checked) {
+                state.selected.add(id);
+            } else {
+                state.selected.delete(id);
+            }
+
             updateSelection();
         });
         body.addEventListener('click', e => {
@@ -586,6 +708,21 @@
             }
             form.addEventListener('input', removeFieldError);
             form.addEventListener('change', removeFieldError);
+
+            // Nice Select renders a separate clickable list, not a native select box.
+            // Clear the error after the plugin updates the original select value.
+            form.addEventListener('click', function (event) {
+                const option = event.target.closest('.nice-select .option');
+                if (!option || option.classList.contains('disabled')) return;
+
+                const dropdown = option.closest('.nice-select');
+                const select = dropdown.previousElementSibling;
+                if (!select || select.tagName !== 'SELECT') return;
+
+                setTimeout(function () {
+                    if (select.value) clearFieldError(select);
+                }, 0);
+            });
         });
         document.addEventListener('click', e => {
             const close = e.target.closest('.modal-close,.sidebar-close,.filters-close');
@@ -677,7 +814,7 @@
         });
         window.resetUserTableDemo = () => {
             if (!confirm('Reset all locally saved demo users?'))
-                return; persist(samples()); state.selected.clear(); state.filters = {}; state.search = ''; state.page = 1; $('#searchbar').value = ''; resetFilters(); render();
+                return; persist(samples()); activityHistory = {}; localStorage.removeItem(ACTIVITY_KEY); state.selected.clear(); state.filters = {}; state.search = ''; state.page = 1; $('#searchbar').value = ''; resetFilters(); render();
         };
     }
     if (document.readyState === 'loading')
