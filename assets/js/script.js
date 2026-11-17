@@ -254,6 +254,7 @@
         }
     }
     function render() {
+        closeDropdowns();
         const rows = results();
         const pages = Math.max(1, Math.ceil(rows.length / state.pageSize));
         state.page = Math.min(state.page, pages);
@@ -272,31 +273,27 @@
                 $('.empty-state-title', el).textContent = 'No users match these filters';
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
-        // Open dropdown upward for the last two visible rows.
-        const tableRows = body.querySelectorAll('tr');
 
-        tableRows.forEach(function (row, index) {
-            const dropdown = row.querySelector('.row-actions-dropdown');
-
-            if (!dropdown) return;
-
-            if (index >= tableRows.length - 2) {
-                dropdown.classList.add('open-up');
-            }
-        });
         // Keep the pagination summary visible, including the 0-user state.
         const paginationWrapper = $('.pagination-wrapper');
         if (paginationWrapper) {
             paginationWrapper.hidden = false;
             paginationWrapper.style.removeProperty('display');
         }
+
         const paginationHost = $('.pagination');
         if (paginationHost) {
             paginationHost.hidden = false;
             paginationHost.style.removeProperty('display');
         }
+
         renderPagination(rows.length);
+
+        if (paginationWrapper) {
+            paginationWrapper.classList.add('pagination-ready');
+        }
         updateSelection();
+
         if (state.detailId && getUser(state.detailId))
             renderDetails(getUser(state.detailId));
     }
@@ -399,33 +396,31 @@
     }
     function closeDropdowns() {
         $$('.toolbar-dropdown-block.show, .row-actions-dropdown.show').forEach(function (dropdown) {
-            dropdown.classList.remove('show');
+            dropdown.classList.remove('show', 'open-up');
         });
         $$('.row-actions-btn[aria-expanded="true"]').forEach(function (button) {
             button.setAttribute('aria-expanded', 'false');
         });
     }
 
-    // Keep the dropdown positioned relative to its original row-actions-wrapper.
-    // Flip upward only if the available space below is too small.
     function positionRowDropdown(button, dropdown) {
         dropdown.classList.remove('open-up');
-        const menuHeight = dropdown.scrollHeight;
+        const rowCount = body.querySelectorAll('tr').length;
+        // Short lists keep the original downward-opening design.
+        if (rowCount <= 3) return;
+
         const buttonRect = button.getBoundingClientRect();
-        const tableContainer = button.closest('.datatable-outline');
-        let bottomLimit = window.innerHeight;
-
-        if (tableContainer) {
-            const containerRect = tableContainer.getBoundingClientRect();
-            bottomLimit = Math.min(bottomLimit, containerRect.bottom);
-        }
-
-        const spaceBelow = bottomLimit - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-        if (spaceBelow < menuHeight + 8 && spaceAbove > spaceBelow) {
+        const tableRect = button.closest('.datatable-outline')?.getBoundingClientRect();
+        const menuHeight = dropdown.scrollHeight;
+        const lowerEdge = Math.min(window.innerHeight, tableRect?.bottom ?? window.innerHeight);
+        const upperEdge = Math.max(0, tableRect?.top ?? 0);
+        const below = lowerEdge - buttonRect.bottom;
+        const above = buttonRect.top - upperEdge;
+        if (below < menuHeight + 8 && above >= menuHeight + 8) {
             dropdown.classList.add('open-up');
         }
     }
+
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
     async function operation(button, fn) {
@@ -669,8 +664,6 @@
             window.jQuery('select').niceSelect();
         }
         $('.datatable').hidden = false;
-        renderSkeleton();
-        setTimeout(render, 180);
         $('#searchbar').addEventListener('input', e => {
             state.search = e.target.value.trim();
             state.page = 1; render();
@@ -757,46 +750,18 @@
             updateSelection();
         });
         window.addEventListener('resize', closeDropdowns);
-        window.addEventListener('scroll', closeDropdowns, true);
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
-            if (toggle) {
-                e.stopPropagation();
-
-                const dropdown = toggle.parentElement.querySelector('.row-actions-dropdown');
-                const wasOpen = dropdown.classList.contains('show');
-
-                closeDropdowns();
-
-                dropdown.classList.toggle('show', !wasOpen);
-                toggle.setAttribute('aria-expanded', String(!wasOpen));
-
-                return;
-            }
-            const action = e.target.closest('[data-row-action]');
-            if (!action)
-                return;
-            const id = action.closest('tr').dataset.userId;
-            const user = getUser(id);
-            if (!user)
-                return;
+            if (!toggle) return;
+            e.stopPropagation();
+            const dropdown = toggle.parentElement.querySelector('.row-actions-dropdown');
+            const wasOpen = dropdown.classList.contains('show');
             closeDropdowns();
-            switch (action.dataset.rowAction) {
-                case 'edit':
-                    openForm('edit', id);
-                    break;
-                case 'view':
-                    state.detailId = id;
-                    renderDetails(user);
-                    openModal('row-action-view-activity');
-                    break;
-                case 'toggle':
-                    beginAction(user.status === 'active' ? 'deactivate' : 'activate', [id], true);
-                    break;
-                case 'delete':
-                    beginAction('delete', [id], true);
-                    break;
+            if (!wasOpen) {
+                positionRowDropdown(toggle, dropdown);
+                dropdown.classList.add('show');
             }
+            toggle.setAttribute('aria-expanded', String(!wasOpen));
         });
         $('#add-user .user-form').addEventListener('submit', e => submitForm(e, 'add'));
         $('#edit-user .user-form').addEventListener('submit', e => submitForm(e, 'edit'));
@@ -824,6 +789,24 @@
             });
         });
         document.addEventListener('click', e => {
+            const rowAction = e.target.closest('[data-row-action]');
+            if (rowAction) {
+                const id = rowAction.closest('tr')?.dataset.userId;
+                const user = getUser(id);
+                if (!user) return;
+                closeDropdowns();
+                switch (rowAction.dataset.rowAction) {
+                    case 'edit': openForm('edit', id); break;
+                    case 'view':
+                        state.detailId = id;
+                        renderDetails(user);
+                        openModal('row-action-view-activity');
+                        break;
+                    case 'toggle': beginAction(user.status === 'active' ? 'deactivate' : 'activate', [id], true); break;
+                    case 'delete': beginAction('delete', [id], true); break;
+                }
+                return;
+            }
             const close = e.target.closest('.modal-close,.sidebar-close,.filters-close');
             if (close) {
                 if (state.busy)
@@ -913,8 +896,18 @@
         });
         window.resetUserTableDemo = () => {
             if (!confirm('Reset all locally saved demo users?'))
-                return; persist(samples()); activityHistory = {}; localStorage.removeItem(ACTIVITY_KEY); state.selected.clear(); state.filters = {}; state.search = ''; state.page = 1; $('#searchbar').value = ''; resetFilters(); render();
+                return; persist(samples());
+            activityHistory = {};
+            localStorage.removeItem(ACTIVITY_KEY);
+            state.selected.clear();
+            state.filters = {};
+            state.search = '';
+            state.page = 1;
+            $('#searchbar').value = '';
+            resetFilters();
+            render();
         };
+        render();
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', init, { once: true });

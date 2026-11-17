@@ -405,7 +405,7 @@
 
 .datatable {
   width: 100%;
-  min-width: 1000px;
+  min-width: 1140px;
   border-collapse: collapse;
   padding: 20px;
 }
@@ -674,12 +674,15 @@
 }
 
 .pagination-wrapper {
-  min-width: 1000px;
+  position: sticky;
+  bottom: 0;
+  min-width: 1140px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
   padding: var(--datatable-spacing);
+  background-color: var(--white);
 }
 
 .input-field.page-size {
@@ -755,6 +758,10 @@
 .page-num {
   font-size: 12px;
   font-weight: 600;
+}
+
+.pagination-wrapper:not(.pagination-ready) {
+  visibility: hidden;
 }
 
 .actions-caption {
