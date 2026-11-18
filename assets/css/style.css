@@ -398,7 +398,7 @@
   border-radius: 14px;
   margin-top: 20px;
   background-color: var(--white);
-  overflow: auto;
+  overflow: auto hidden;
   border: 1px solid var(--purple-700);
   --datatable-spacing: 18px 20px;
 }

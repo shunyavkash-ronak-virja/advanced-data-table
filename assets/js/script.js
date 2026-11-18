@@ -396,30 +396,13 @@
     }
     function closeDropdowns() {
         $$('.toolbar-dropdown-block.show, .row-actions-dropdown.show').forEach(function (dropdown) {
-            dropdown.classList.remove('show', 'open-up');
+            dropdown.classList.remove('show');
         });
         $$('.row-actions-btn[aria-expanded="true"]').forEach(function (button) {
             button.setAttribute('aria-expanded', 'false');
         });
     }
 
-    function positionRowDropdown(button, dropdown) {
-        dropdown.classList.remove('open-up');
-        const rowCount = body.querySelectorAll('tr').length;
-        // Short lists keep the original downward-opening design.
-        if (rowCount <= 3) return;
-
-        const buttonRect = button.getBoundingClientRect();
-        const tableRect = button.closest('.datatable-outline')?.getBoundingClientRect();
-        const menuHeight = dropdown.scrollHeight;
-        const lowerEdge = Math.min(window.innerHeight, tableRect?.bottom ?? window.innerHeight);
-        const upperEdge = Math.max(0, tableRect?.top ?? 0);
-        const below = lowerEdge - buttonRect.bottom;
-        const above = buttonRect.top - upperEdge;
-        if (below < menuHeight + 8 && above >= menuHeight + 8) {
-            dropdown.classList.add('open-up');
-        }
-    }
 
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
@@ -758,7 +741,6 @@
             const wasOpen = dropdown.classList.contains('show');
             closeDropdowns();
             if (!wasOpen) {
-                positionRowDropdown(toggle, dropdown);
                 dropdown.classList.add('show');
             }
             toggle.setAttribute('aria-expanded', String(!wasOpen));
