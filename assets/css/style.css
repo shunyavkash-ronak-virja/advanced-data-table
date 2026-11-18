@@ -398,7 +398,7 @@
   border-radius: 14px;
   margin-top: 20px;
   background-color: var(--white);
-  overflow: auto hidden;
+  overflow: auto;
   border: 1px solid var(--purple-700);
   --datatable-spacing: 18px 20px;
 }
@@ -569,7 +569,7 @@
   top: 100%;
   right: 0;
   padding-top: 6px;
-  z-index: 2;
+  z-index: 10000;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8);
@@ -587,6 +587,17 @@
   bottom: 100%;
   padding-top: 0;
   padding-bottom: 6px;
+}
+
+.row-actions-dropdown.open-center {
+  top: 50%;
+  right: calc(100% + 8px);
+  bottom: auto;
+  transform: translateY(-50%) scale(0.8);
+}
+
+.row-actions-dropdown.open-center.show {
+  transform: translateY(-50%) scale(1);
 }
 
 .row-actions-stack {

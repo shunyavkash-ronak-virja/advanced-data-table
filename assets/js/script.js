@@ -274,6 +274,25 @@
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
 
+        const tableRows = [...body.querySelectorAll('tr')];
+        const totalRows = tableRows.length;
+
+        tableRows.forEach(function (row, index) {
+            const dropdown = row.querySelector('.row-actions-dropdown');
+
+            if (!dropdown) return;
+
+            dropdown.classList.remove('open-up', 'open-center');
+
+            if (totalRows <= 2) {
+                // One or two users: center the dropdown.
+                dropdown.classList.add('open-center');
+            } else if (index >= totalRows - 2) {
+                // Last two rows: open upward.
+                dropdown.classList.add('open-up');
+            }
+        });
+
         // Keep the pagination summary visible, including the 0-user state.
         const paginationWrapper = $('.pagination-wrapper');
         if (paginationWrapper) {
@@ -395,14 +414,16 @@
         syncBodyScroll();
     }
     function closeDropdowns() {
-        $$('.toolbar-dropdown-block.show, .row-actions-dropdown.show').forEach(function (dropdown) {
-            dropdown.classList.remove('show');
-        });
-        $$('.row-actions-btn[aria-expanded="true"]').forEach(function (button) {
-            button.setAttribute('aria-expanded', 'false');
-        });
-    }
+        $$('.toolbar-dropdown-block.show, .row-actions-dropdown.show')
+            .forEach(function (dropdown) {
+                dropdown.classList.remove('show');
+            });
 
+        $$('.row-actions-btn[aria-expanded="true"]')
+            .forEach(function (button) {
+                button.setAttribute('aria-expanded', 'false');
+            });
+    }
 
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
     function showError(title, message, retry = null) { closeAll(); state.retry = retry; $('.error-modal-title').textContent = title; $('.error-modal-description').textContent = message; openModal('error-modal'); }
@@ -735,14 +756,20 @@
         window.addEventListener('resize', closeDropdowns);
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
+
             if (!toggle) return;
+
             e.stopPropagation();
+
             const dropdown = toggle.parentElement.querySelector('.row-actions-dropdown');
             const wasOpen = dropdown.classList.contains('show');
+
             closeDropdowns();
+
             if (!wasOpen) {
                 dropdown.classList.add('show');
             }
+
             toggle.setAttribute('aria-expanded', String(!wasOpen));
         });
         $('#add-user .user-form').addEventListener('submit', e => submitForm(e, 'add'));
