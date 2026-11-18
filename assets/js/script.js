@@ -274,24 +274,9 @@
         }
         body.replaceChildren(...visiblePage(rows).map(renderRow));
 
-        const tableRows = [...body.querySelectorAll('tr')];
-        const totalRows = tableRows.length;
-
-        tableRows.forEach(function (row, index) {
-            const dropdown = row.querySelector('.row-actions-dropdown');
-
-            if (!dropdown) return;
-
-            dropdown.classList.remove('open-up', 'open-center');
-
-            if (totalRows <= 2) {
-                // One or two users: center the dropdown.
-                dropdown.classList.add('open-center');
-            } else if (index >= totalRows - 2) {
-                // Last two rows: open upward.
-                dropdown.classList.add('open-up');
-            }
-        });
+        // Position classes are calculated from the visible scroll area, not
+        // the row's index within the selected page size.
+        updateRowDropdownPositions();
 
         // Keep the pagination summary visible, including the 0-user state.
         const paginationWrapper = $('.pagination-wrapper');
@@ -423,6 +408,62 @@
             .forEach(function (button) {
                 button.setAttribute('aria-expanded', 'false');
             });
+    }
+
+    // Measure the original menu without changing its visible state or design.
+    function rowMenuHeight(dropdown) {
+        const clone = dropdown.cloneNode(true);
+        clone.classList.remove('open-up', 'open-center');
+        clone.classList.add('show');
+        clone.style.setProperty('visibility', 'hidden', 'important');
+        clone.style.setProperty('pointer-events', 'none', 'important');
+        clone.style.setProperty('transition', 'none', 'important');
+        clone.style.setProperty('animation', 'none', 'important');
+        dropdown.parentElement.appendChild(clone);
+        const height = clone.getBoundingClientRect().height || clone.scrollHeight;
+        clone.remove();
+        return height;
+    }
+
+    function rowMenuBounds(button) {
+        let top = 0;
+        let bottom = window.innerHeight;
+        // Include all scrolling/clipping ancestors, not just the viewport.
+        for (let ancestor = button.parentElement; ancestor && ancestor !== document.body; ancestor = ancestor.parentElement) {
+            const style = getComputedStyle(ancestor);
+            if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
+                const rect = ancestor.getBoundingClientRect();
+                top = Math.max(top, rect.top);
+                bottom = Math.min(bottom, rect.bottom);
+            }
+        }
+        return { top, bottom };
+    }
+
+    function updateRowDropdownPositions() {
+        const rows = [...body.querySelectorAll('tr')];
+        rows.forEach(function (row) {
+            const button = row.querySelector('.row-actions-btn');
+            const dropdown = row.querySelector('.row-actions-dropdown');
+            if (!button || !dropdown || dropdown.classList.contains('show')) return;
+
+            dropdown.classList.remove('open-up', 'open-center');
+            if (rows.length <= 2) {
+                dropdown.classList.add('open-center');
+                return;
+            }
+
+            const buttonRect = button.getBoundingClientRect();
+            const bounds = rowMenuBounds(button);
+            const height = rowMenuHeight(dropdown);
+            const gap = 6;
+            const below = bounds.bottom - buttonRect.bottom;
+            const above = buttonRect.top - bounds.top;
+
+            if (below < height + gap && above > below) {
+                dropdown.classList.add('open-up');
+            }
+        });
     }
 
     function showSuccess(title, message) { closeAll(); $('.success-modal-title').textContent = title; $('.success-modal-description').textContent = message; openModal('success-modal'); }
@@ -753,7 +794,22 @@
 
             updateSelection();
         });
-        window.addEventListener('resize', closeDropdowns);
+        window.addEventListener('resize', function () {
+            closeDropdowns();
+            updateRowDropdownPositions();
+        });
+        // Recalculate direction as the table scrolls, without closing filters
+        // or other menus. Do not change an already-open row menu's direction.
+        let rowPositionFrame = 0;
+        document.addEventListener('scroll', function (event) {
+            if (!event.target?.contains?.(body) &&
+                !body.contains(event.target)) return;
+            if (rowPositionFrame) return;
+            rowPositionFrame = requestAnimationFrame(function () {
+                rowPositionFrame = 0;
+                updateRowDropdownPositions();
+            });
+        }, true);
         body.addEventListener('click', e => {
             const toggle = e.target.closest('.row-actions-btn');
 
@@ -767,6 +823,7 @@
             closeDropdowns();
 
             if (!wasOpen) {
+                updateRowDropdownPositions();
                 dropdown.classList.add('show');
             }
 
