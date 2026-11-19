@@ -363,6 +363,8 @@
             errors.status = 'Select a valid status.';
         if (!validDate(data.createdDate)) {
             errors.createdDate = 'Please select a valid registration date.';
+        } else if (data.createdDate > today()) {
+            errors.createdDate = 'Registration date cannot be in the future.';
         }
         Object.entries(errors).forEach(([key, msg]) => fieldError(fields[key], msg));
         return Object.keys(errors).length ? null : data;
@@ -522,10 +524,14 @@
                     throw Error('This user no longer exists.');
                 const previousUser = getUser(state.editId);
                 persist(users.map(u => u.id === state.editId ? { ...u, ...data } : u));
-                recordActivity(state.editId, 'Updated profile', 'User details were updated.');
+                recordActivity(state.editId, 'User details updated', 'The user’s profile information was updated.');
                 if (previousUser.department !== data.department) {
-                    recordActivity(state.editId, 'Changed department',
-                        label(previousUser.department, departments) + ' to ' + label(data.department, departments));
+                    recordActivity(state.editId, 'Department changed',
+                        'Department changed from ' + label(previousUser.department, departments) + ' to ' + label(data.department, departments) + '.');
+                }
+                if (previousUser.status !== data.status) {
+                    recordActivity(state.editId, 'Status changed',
+                        'Status changed from ' + label(previousUser.status, []) + ' to ' + label(data.status, []) + '.');
                 }
             }
             else {
@@ -548,7 +554,27 @@
     function beginAction(action, ids, individual = false) {
         const effective = actionIds(ids, action);
         if (!effective.length) {
-            showError('No eligible users', 'Select at least one user who can be ' + ACTIONS[action].past + '.');
+            const selectedUsers = ids.map(getUser).filter(Boolean);
+            const count = selectedUsers.length;
+            const subject = count === 1 ? 'The selected user' : `All ${count} selected users`;
+            let title;
+            let description;
+
+            if (!count) {
+                title = 'No Users Selected';
+                description = 'Select at least one user before performing a bulk action.';
+            } else if (action === 'activate' && selectedUsers.every(user => user.status === 'active')) {
+                title = count === 1 ? 'User Already Active' : 'Users Already Active';
+                description = `${subject} ${count === 1 ? 'is' : 'are'} already active. Select ${count === 1 ? 'a user' : 'users'} with a different status to activate.`;
+            } else if (action === 'deactivate' && selectedUsers.every(user => user.status === 'suspended')) {
+                title = count === 1 ? 'User Already Suspended' : 'Users Already Suspended';
+                description = `${subject} ${count === 1 ? 'is' : 'are'} already suspended. Select ${count === 1 ? 'a user' : 'users'} who is not suspended to deactivate.`;
+            } else {
+                title = 'No Eligible Users';
+                description = `None of the selected users can be ${ACTIONS[action].past}. Review their current statuses and try again.`;
+            }
+
+            showError(title, description);
             return;
         }
         state.pending = { action, ids: effective, individual };
@@ -591,8 +617,12 @@
             const action = pending.action;
             if (action === 'delete')
                 persist(users.filter(u => !set.has(u.id)));
-            else
+            else {
                 persist(users.map(u => set.has(u.id) ? { ...u, status: action === 'activate' ? 'active' : 'suspended' } : u));
+                ids.forEach(id => recordActivity(id,
+                    action === 'activate' ? 'User activated' : 'User deactivated',
+                    action === 'activate' ? 'The user account was activated.' : 'The user account was suspended.'));
+            }
             ids.forEach(id => state.selected.delete(id));
             if (state.detailId && !getUser(state.detailId))
                 state.detailId = null;
@@ -644,7 +674,12 @@
             const heading = item.querySelector('.activity-title, .recent-activity-name, .activity-name, h3, h4, h5, strong');
             const description = item.querySelector('.activity-description, .activity-text, .recent-activity-description, p');
             const caption = item.querySelector('.activity-caption, .activity-date, time');
-            if (heading) heading.textContent = entry.title;
+            // Display older saved activity records with the clearer labels too.
+            const displayTitles = {
+                'Updated profile': 'User details updated',
+                'Changed department': 'Department changed'
+            };
+            if (heading) heading.textContent = displayTitles[entry.title] || entry.title;
             if (description) description.textContent = entry.description;
             if (caption) caption.textContent = activityDate(entry.time);
             activityList.appendChild(item);
@@ -705,6 +740,11 @@
             document.body.appendChild(modal);
         });
         $$('.user-form, .filters-dropdown form').forEach(form => form.noValidate = true);
+        // Limit the native date picker too; validate() remains the source of truth.
+        ['#add-user-registration-date', '#edit-user-registration-date'].forEach(selector => {
+            const input = $(selector);
+            if (input) input.max = today();
+        });
         if (window.jQuery && window.jQuery.fn.niceSelect) {
             window.jQuery('select').niceSelect();
         }
@@ -973,7 +1013,10 @@
             resetFilters();
             render();
         };
-        render();
+        // Let the browser paint the existing skeleton rows before showing data.
+        // This is a short initial-load preview; localStorage itself is synchronous.
+        renderSkeleton();
+        window.setTimeout(render, 500);
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', init, { once: true });

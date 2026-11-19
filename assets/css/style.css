@@ -454,13 +454,6 @@
   border-color: var(--bluish-purple);
 }
 
-/* 
--------------- AI style -------------
-.datatable-checkbox:indeterminate {
-  background: var(--bluish-purple);
-  border-color: var(--bluish-purple);
-} */
-
 .datatable-checkbox::before {
   height: 80%;
   aspect-ratio: 1;
@@ -486,14 +479,6 @@
   visibility: visible;
   transform: scale(1);
 }
-
-/* 
--------------- AI style -------------
-.datatable-checkbox:indeterminate::before {
-  opacity: 1;
-  visibility: visible;
-  transform: scale(1);
-} */
 
 .datatable-shorting-icon {
   width: 14px;
@@ -569,7 +554,7 @@
   top: 100%;
   right: 0;
   padding-top: 6px;
-  z-index: 10000;
+  z-index: 999;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8);
