@@ -43,8 +43,11 @@
     function load() {
         try {
             const raw = localStorage.getItem(KEY);
-            if (raw === null)
-                return samples();
+            if (raw === null) {
+                const initialUsers = samples();
+                localStorage.setItem(KEY, JSON.stringify(initialUsers));
+                return initialUsers;
+            }
             const data = JSON.parse(raw);
             if (!Array.isArray(data) || !data.every(validUser) || new Set(data.map(u => u.id)).size !== data.length || new Set(data.map(u => normalizeEmail(u.email))).size !== data.length)
                 throw Error('Invalid saved users');
@@ -369,11 +372,30 @@
         Object.entries(errors).forEach(([key, msg]) => fieldError(fields[key], msg));
         return Object.keys(errors).length ? null : data;
     }
+    // Only animate a result icon while its modal is visible.
+    function syncModalAnimation(modal, shouldPlay) {
+        if (!modal || !['success-modal', 'error-modal'].includes(modal.id)) return;
+        const animation = modal.querySelector('dotlottie-wc');
+        if (!animation) return;
+        try {
+            if (shouldPlay) {
+                animation.stop?.();
+                const result = animation.play?.();
+                if (result && typeof result.catch === 'function') result.catch(() => { });
+            } else {
+                const result = animation.pause?.();
+                if (result && typeof result.catch === 'function') result.catch(() => { });
+            }
+        } catch (error) {
+            console.warn('Unable to control modal animation:', error);
+        }
+    }
     function openModal(id) {
         const modal = document.getElementById(id);
         if (!modal)
             return;
         modal.classList.add('active');
+        syncModalAnimation(modal, true);
         modal.setAttribute('role', 'dialog');
         modal.setAttribute('aria-modal', 'true');
         modal.dataset.previousFocus = '';
@@ -389,6 +411,7 @@
         const modal = document.getElementById(id);
         if (!modal) return;
         modal.classList.remove('active');
+        syncModalAnimation(modal, false);
         syncBodyScroll();
         if (modal._previousFocus && modal._previousFocus.isConnected) {
             modal._previousFocus.focus();
@@ -397,6 +420,7 @@
     function closeAll() {
         $$('.modal.active, .sidebar.active').forEach(function (modal) {
             modal.classList.remove('active');
+            syncModalAnimation(modal, false);
         });
         syncBodyScroll();
     }
@@ -1016,7 +1040,7 @@
         // Let the browser paint the existing skeleton rows before showing data.
         // This is a short initial-load preview; localStorage itself is synchronous.
         renderSkeleton();
-        window.setTimeout(render, 500);
+        window.setTimeout(render, 200);
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', init, { once: true });
