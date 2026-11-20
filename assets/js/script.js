@@ -93,7 +93,6 @@
     // API integration point: replace localStorage.setItem with your save endpoint.
     const persist = next => { localStorage.setItem(KEY, JSON.stringify(next)); users = next; };
     const getUser = id => users.find(u => u.id === id);
-    const hasFilters = () => Object.values(state.filters).some(Boolean);
     function results() {
         const q = state.search.toLocaleLowerCase();
         const f = state.filters;
@@ -166,7 +165,7 @@
             const template = document.getElementById('pagination-arrow-template');
             if (template && template.content && template.content.firstElementChild) {
                 icon = template.content.firstElementChild.cloneNode(true);
-                if (direction === 'previous') icon.style.transform = 'rotate(180deg)';
+                if (direction === 'previous') icon.classList.add('pagination-icon-reversed');
             }
         }
         if (icon) button.appendChild(icon);
@@ -272,11 +271,11 @@
         state.page = Math.min(state.page, pages);
         const empty = rows.length === 0;
         $('.datatable').hidden = empty;
-        $$('.empty-states').forEach(el => el.style.display = 'none');
+        $$('.empty-states').forEach(el => el.classList.remove('js-empty-visible'));
         if (empty) {
             const kind = users.length === 0 ? 'empty-dataset' : state.search ? 'search-results' : 'filters-results';
             const el = $(`.${kind}`);
-            el.style.display = 'flex';
+            el.classList.add('js-empty-visible');
             if (kind === 'search-results')
                 $('.empty-state-title', el).textContent = `No results for '${state.search}'`;
             if (kind === 'empty-dataset')
@@ -294,13 +293,11 @@
         const paginationWrapper = $('.pagination-wrapper');
         if (paginationWrapper) {
             paginationWrapper.hidden = false;
-            paginationWrapper.style.removeProperty('display');
         }
 
         const paginationHost = $('.pagination');
         if (paginationHost) {
             paginationHost.hidden = false;
-            paginationHost.style.removeProperty('display');
         }
 
         renderPagination(rows.length);
@@ -415,7 +412,6 @@
         syncModalAnimation(modal, true);
         modal.setAttribute('role', 'dialog');
         modal.setAttribute('aria-modal', 'true');
-        modal.dataset.previousFocus = '';
         modal._previousFocus = document.activeElement;
         document.body.classList.add('body-hidden');
         requestAnimationFrame(() => { const focus = $('input:not([type=hidden]),button', modal); focus?.focus(); });
@@ -458,10 +454,7 @@
         const clone = dropdown.cloneNode(true);
         clone.classList.remove('open-up', 'open-center');
         clone.classList.add('show');
-        clone.style.setProperty('visibility', 'hidden', 'important');
-        clone.style.setProperty('pointer-events', 'none', 'important');
-        clone.style.setProperty('transition', 'none', 'important');
-        clone.style.setProperty('animation', 'none', 'important');
+        clone.classList.add('js-dropdown-measuring');
         dropdown.parentElement.appendChild(clone);
         const height = clone.getBoundingClientRect().height || clone.scrollHeight;
         clone.remove();
@@ -674,6 +667,7 @@
             showSuccess(pending.individual ? `User ${cfg.past[0].toUpperCase() + cfg.past.slice(1)}` : cfg.success, `${n} user${n === 1 ? ' has' : 's have'} been successfully ${cfg.past}.`);
         });
     }
+    const originalActivityTemplates = $$('.recent-activity-item', $('#row-action-view-activity')).map(item => item.cloneNode(true));
     function renderDetails(u) {
         const root = $('#row-action-view-activity');
         const sidebarAvatar = $('.sidebar-author-profile', root);
@@ -696,8 +690,7 @@
         // Keep the original sidebar activity item HTML, icons and CSS classes.
         const activityList = $('.recent-activity-list', root);
         if (!activityList) return;
-        const existingItems = $$('.recent-activity-item', activityList);
-        if (!existingItems.length) return;
+        if (!originalActivityTemplates.length) return;
 
         // A user creation event exists even for older demo records.
         const history = (activityHistory[u.id] || []).slice();
@@ -708,7 +701,7 @@
 
         // Preserve each original activity row and its icon instead of rebuilding its layout.
         // For longer histories, clone existing rows and retain all their classes.
-        const templates = existingItems.map(item => item.cloneNode(true));
+        const templates = originalActivityTemplates;
         activityList.replaceChildren();
         history.forEach(function (entry, index) {
             const item = templates[Math.min(index, templates.length - 1)].cloneNode(true);
@@ -764,16 +757,6 @@
         }));
     }
     function init() {
-        // Apply the same red error border to text inputs and Nice Select controls.
-        const validationStyle = document.createElement('style');
-        validationStyle.textContent = `
-            .input-field[aria-invalid="true"],
-            .nice-select[aria-invalid="true"],
-            .nice-select.input-error-field {
-                border-color: var(--red) !important;
-            }
-        `;
-        document.head.appendChild(validationStyle);
         // The original HTML places bulk modals inside the toolbar.
         // Move only the modal elements (not their icons or contents) outside
         // the hidden toolbar so they can open independently.
@@ -1042,8 +1025,8 @@
             }
         });
         window.resetUserTableDemo = () => {
-            if (!confirm('Reset all locally saved demo users?'))
-                return; persist(samples());
+            if (!confirm('Reset all locally saved demo users?')) return;
+            persist(samples());
             activityHistory = {};
             localStorage.removeItem(ACTIVITY_KEY);
             state.selected.clear();
@@ -1052,7 +1035,6 @@
             state.page = 1;
             $('#searchbar').value = '';
             resetFilters();
-            render();
         };
         // Let the browser paint the existing skeleton rows before showing data.
         // This is a short initial-load preview; localStorage itself is synchronous.

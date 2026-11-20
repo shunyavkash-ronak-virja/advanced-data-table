@@ -590,6 +590,13 @@
   transform: translateY(-50%) scale(1);
 }
 
+.row-actions-dropdown.js-dropdown-measuring {
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+  animation: none;
+}
+
 .row-actions-stack {
   width: 100%;
   min-width: 190px;
@@ -641,13 +648,17 @@
 }
 
 .empty-states {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   gap: 18px;
   padding: 80px 40px;
+}
+
+.empty-states.js-empty-visible {
+  display: flex;
 }
 
 .empty-state-icon-block {
