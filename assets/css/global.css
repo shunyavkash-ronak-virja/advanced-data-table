@@ -530,7 +530,9 @@ select[required] {
   margin-top: 4px;
 }
 
-.input-field[aria-invalid="true"] {
+.input-field[aria-invalid="true"],
+.nice-select[aria-invalid="true"],
+.nice-select.input-error-field {
   border-color: var(--red);
 }
 

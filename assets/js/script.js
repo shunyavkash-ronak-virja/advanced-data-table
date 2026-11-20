@@ -372,20 +372,26 @@
         Object.entries(errors).forEach(([key, msg]) => fieldError(fields[key], msg));
         return Object.keys(errors).length ? null : data;
     }
-    // Only animate a result icon while its modal is visible.
+    // Create each player only after init() has moved the modals into their final DOM location.
+    // Moving a connected dotlottie-wc element disconnects/reconnects it and can abort its fetch.
     function syncModalAnimation(modal, shouldPlay) {
         if (!modal || !['success-modal', 'error-modal'].includes(modal.id)) return;
-        const animation = modal.querySelector('dotlottie-wc');
+        let animation = modal.querySelector('dotlottie-wc');
+        if (shouldPlay && !animation) {
+            const placeholder = modal.querySelector('[data-lottie-src]');
+            if (!placeholder) return;
+            animation = document.createElement('dotlottie-wc');
+            animation.className = placeholder.className;
+            animation.setAttribute('src', placeholder.dataset.lottieSrc);
+            animation.setAttribute('speed', placeholder.dataset.lottieSpeed || '1.4');
+            animation.setAttribute('autoplay', '');
+            placeholder.replaceWith(animation);
+            return;
+        }
         if (!animation) return;
         try {
-            if (shouldPlay) {
-                animation.stop?.();
-                const result = animation.play?.();
-                if (result && typeof result.catch === 'function') result.catch(() => { });
-            } else {
-                const result = animation.pause?.();
-                if (result && typeof result.catch === 'function') result.catch(() => { });
-            }
+            const result = shouldPlay ? animation.play?.() : animation.pause?.();
+            if (result && typeof result.catch === 'function') result.catch(() => { });
         } catch (error) {
             console.warn('Unable to control modal animation:', error);
         }
