@@ -483,6 +483,11 @@
 .datatable-shorting-icon {
   width: 14px;
   aspect-ratio: 1;
+  transition: all 0.2s ease-in-out;
+}
+
+.datatable-shorting-icon.upward {
+  transform: rotate(-180deg);
 }
 
 .datatable-body tr.selected {

@@ -33,7 +33,7 @@
         return Array.from({ length: 120 }, (_, i) => {
             const name = names[i % names.length];
             const date = new Date(Date.UTC(2024, 0, 1 + (i * 11) % 980)).toISOString().slice(0, 10);
-            return { id: `demo-${i + 1}`, name, email: `${name.toLowerCase().replace(/\s+/g, '.')}${i >= names.length ? i : ''}@amethyst.io`, department: departments[i % departments.length].value, role: roles[i % roles.length], status: statuses[i % statuses.length], createdDate: date };
+            return { id: `demo-${i + 1}`, name, email: `${name.toLowerCase().replace(/\s+/g, '.')}${i >= names.length ? i : ''}@gmail.com`, department: departments[i % departments.length].value, role: roles[i % roles.length], status: statuses[i % statuses.length], createdDate: date };
         });
     }
     function validUser(u) {
@@ -256,8 +256,17 @@
             counter.textContent = count + (count === 1 ? ' user selected' : ' users selected');
         }
     }
+    function updateSortIcons() {
+        const [field, direction] = state.sort.split('-');
+        const icons = $$('.datatable-head .datatable-shorting-icon');
+        icons.forEach((icon, index) => {
+            const column = index === 0 ? 'name' : 'department';
+            icon.classList.toggle('upward', field === column && direction === 'desc');
+        });
+    }
     function render() {
         closeDropdowns();
+        updateSortIcons();
         const rows = results();
         const pages = Math.max(1, Math.ceil(rows.length / state.pageSize));
         state.page = Math.min(state.page, pages);
@@ -372,29 +381,31 @@
         Object.entries(errors).forEach(([key, msg]) => fieldError(fields[key], msg));
         return Object.keys(errors).length ? null : data;
     }
-    // Create each player only after init() has moved the modals into their final DOM location.
-    // Moving a connected dotlottie-wc element disconnects/reconnects it and can abort its fetch.
+    // Initialize animations only after init() moves modals to document.body.
+    // A fresh player on each opening guarantees playback from frame zero,
+    // even if the installed dotlottie-wc version does not expose reset APIs.
     function syncModalAnimation(modal, shouldPlay) {
         if (!modal || !['success-modal', 'error-modal'].includes(modal.id)) return;
-        let animation = modal.querySelector('dotlottie-wc');
-        if (shouldPlay && !animation) {
-            const placeholder = modal.querySelector('[data-lottie-src]');
-            if (!placeholder) return;
-            animation = document.createElement('dotlottie-wc');
-            animation.className = placeholder.className;
-            animation.setAttribute('src', placeholder.dataset.lottieSrc);
-            animation.setAttribute('speed', placeholder.dataset.lottieSpeed || '1.4');
-            animation.setAttribute('autoplay', '');
-            placeholder.replaceWith(animation);
+        const current = modal.querySelector('dotlottie-wc');
+        if (!shouldPlay) {
+            if (current) {
+                try { current.pause?.(); } catch (error) { console.warn('Unable to pause modal animation:', error); }
+            }
             return;
         }
-        if (!animation) return;
-        try {
-            const result = shouldPlay ? animation.play?.() : animation.pause?.();
-            if (result && typeof result.catch === 'function') result.catch(() => { });
-        } catch (error) {
-            console.warn('Unable to control modal animation:', error);
-        }
+
+        const placeholder = modal.querySelector('[data-lottie-src]');
+        if (!placeholder && !current) return;
+        const source = placeholder || current;
+        const src = source.dataset.lottieSrc || source.getAttribute('src');
+        if (!src) return;
+        const player = document.createElement('dotlottie-wc');
+        player.className = source.className;
+        player.setAttribute('src', src);
+        player.setAttribute('speed', source.dataset.lottieSpeed || source.getAttribute('speed') || '1.4');
+        player.setAttribute('autoplay', '');
+        // No loop: each opening plays the animation once.
+        source.replaceWith(player);
     }
     function openModal(id) {
         const modal = document.getElementById(id);
