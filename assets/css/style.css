@@ -419,6 +419,10 @@
   --datatable-spacing: 18px 20px;
 }
 
+.datatable-outline.is-empty {
+  overflow: hidden;
+}
+
 .datatable {
   width: 100%;
   min-width: 1140px;
@@ -711,6 +715,10 @@
   gap: 24px;
   padding: var(--datatable-spacing);
   background-color: var(--white);
+}
+
+.datatable-outline.is-empty .pagination-wrapper {
+  display: none;
 }
 
 .input-field.page-size {

@@ -271,6 +271,7 @@
         state.page = Math.min(state.page, pages);
         const empty = rows.length === 0;
         $('.datatable').hidden = empty;
+        $('.datatable-outline').classList.toggle('is-empty', empty);
         $$('.empty-states').forEach(el => el.classList.remove('js-empty-visible'));
         if (empty) {
             const kind = users.length === 0 ? 'empty-dataset' : state.search ? 'search-results' : 'filters-results';
