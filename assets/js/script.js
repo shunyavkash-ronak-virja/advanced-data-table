@@ -760,9 +760,6 @@
         // The original HTML places bulk modals inside the toolbar.
         // Move only the modal elements (not their icons or contents) outside
         // the hidden toolbar so they can open independently.
-        $$('.bulk-actions-wrapper > .bulk-actions > .modal, .bulk-actions-wrapper .modal').forEach(function (modal) {
-            document.body.appendChild(modal);
-        });
         $$('.user-form, .filters-dropdown form').forEach(form => form.noValidate = true);
         // Limit the native date picker too; validate() remains the source of truth.
         ['#add-user-registration-date', '#edit-user-registration-date'].forEach(selector => {
