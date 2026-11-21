@@ -773,10 +773,33 @@
             window.jQuery('select').niceSelect();
         }
         $('.datatable').hidden = false;
-        $('#searchbar').addEventListener('input', e => {
-            state.search = e.target.value.trim();
-            state.page = 1; render();
+        const searchInput = $('#searchbar');
+        const searchClearButton = $('.searchbar-clear-btn', searchInput.closest('.toolbar-searchbar-stack'));
+
+        function updateSearchClearButton() {
+            if (!searchClearButton) return;
+            const hasText = searchInput.value.length > 0;
+            searchClearButton.classList.toggle('show', hasText);
+            searchClearButton.setAttribute('aria-hidden', String(!hasText));
+            searchClearButton.tabIndex = hasText ? 0 : -1;
+        }
+
+        searchInput.addEventListener('input', () => {
+            state.search = searchInput.value.trim();
+            state.page = 1;
+            updateSearchClearButton();
+            render();
         });
+
+        if (searchClearButton) {
+            searchClearButton.setAttribute('aria-label', 'Clear search');
+            searchClearButton.addEventListener('click', () => {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                searchInput.focus();
+            });
+        }
+        updateSearchClearButton();
         const pageSizeSelect = $('#page-size');
 
         state.pageSize = Number(pageSizeSelect.value) || 10;
@@ -1033,7 +1056,8 @@
             state.filters = {};
             state.search = '';
             state.page = 1;
-            $('#searchbar').value = '';
+            searchInput.value = '';
+            updateSearchClearButton();
             resetFilters();
         };
         // Let the browser paint the existing skeleton rows before showing data.

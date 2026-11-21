@@ -278,17 +278,33 @@
 }
 
 .toolbar-search-input {
-  padding-left: 40px;
+  padding-inline: 40px;
 }
 
-.searchbar-icon {
+.searchbar-icon,
+.searchbar-clear-btn {
   width: 16px;
   aspect-ratio: 1;
   position: absolute;
   top: 50%;
-  left: 10px;
   transform: translateY(-50%);
   color: var(--encore);
+}
+
+.searchbar-icon {
+  left: 10px;
+}
+
+.searchbar-clear-btn {
+  right: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.searchbar-clear-btn.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 .toolbar-action-wrapper {
@@ -713,13 +729,20 @@
 }
 
 .page-size .list {
+  min-width: max-content;
   padding: 6px;
   border-radius: 6px;
   gap: 10px;
   top: auto;
   bottom: 100%;
+  left: 50%;
+  transform: scale(0.8) translateX(-50%);
   margin-top: 0;
   margin-bottom: 4px;
+}
+
+.page-size.open .list {
+  transform: scale(1) translateX(-50%);
 }
 
 .page-size .list::-webkit-scrollbar {
