@@ -2,12 +2,17 @@
     'use strict';
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-    const KEY = 'amethyst-users-readable-v2';
+    const KEY = 'user-management-users';
+    const ACTIVITY_KEY = 'user-management-activity-history';
+    const LEGACY_KEY = 'amethyst-users-readable-v2';
+    const LEGACY_ACTIVITY_KEY = LEGACY_KEY + '-activity';
     const departments = [...$('#add-user-department').options].filter(o => o.value).map(o => ({ value: o.value, label: o.textContent }));
     const roles = ['admin', 'member', 'viewer', 'editor'];
     const statuses = ['active', 'pending', 'suspended', 'invited'];
     const names = ['Sofia Bennett', 'Daniel Kim', 'Maya Patel', 'Oliver Johnson', 'Ava Williams', 'Noah Brown', 'Emma Davis', 'Liam Wilson', 'Isabella Moore', 'Ethan Taylor', 'Amelia Anderson', 'Lucas Thomas', 'Mia Jackson', 'James White', 'Charlotte Harris', 'Benjamin Martin', 'Harper Thompson', 'Henry Garcia', 'Ella Martinez', 'Alexander Robinson', 'Grace Clark', 'Michael Rodriguez', 'Chloe Lewis', 'William Lee', 'Zoe Walker', 'Elijah Hall', 'Aria Allen', 'Logan Young', 'Lily King', 'Jack Wright', 'Nora Scott', 'Samuel Green', 'Emily Baker', 'David Adams', 'Ruby Nelson', 'Jacob Carter', 'Hannah Mitchell', 'Leo Perez', 'Sarah Roberts', 'Nathan Turner', 'Aiden Phillips', 'Olivia Campbell', 'Ryan Parker', 'Layla Evans', 'Aaron Edwards', 'Eva Collins', 'Owen Stewart', 'Alice Morris', 'Isaac Rogers', 'Leah Reed'];
     const label = (v, options) => options.find(o => o.value === v)?.label || (v ? v.charAt(0).toUpperCase() + v.slice(1) : '');
+    // Keep the stored status 'suspended' for compatibility with existing users and HTML selects.
+    const statusLabel = status => status === 'suspended' ? 'Deactivated' : label(status, []);
     const uid = () => window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const normalizeEmail = v => v.trim().toLowerCase();
     function validDate(value) {
@@ -39,6 +44,39 @@
     function validUser(u) {
         return u && typeof u.id === 'string' && typeof u.name === 'string' && typeof u.email === 'string' && departments.some(d => d.value === u.department) && roles.includes(u.role) && statuses.includes(u.status) && validDate(u.createdDate);
     }
+    // One-time migration: retain existing user records and activity history when
+    // switching to descriptive storage keys. Never overwrite a newer key.
+    function migrateStorage() {
+        const legacyUsers = localStorage.getItem(LEGACY_KEY);
+        if (localStorage.getItem(KEY) === null && legacyUsers !== null) {
+            try {
+                const data = JSON.parse(legacyUsers);
+                if (Array.isArray(data) && data.every(validUser) &&
+                    new Set(data.map(u => u.id)).size === data.length &&
+                    new Set(data.map(u => normalizeEmail(u.email))).size === data.length) {
+                    localStorage.setItem(KEY, legacyUsers);
+                    localStorage.removeItem(LEGACY_KEY);
+                }
+            } catch (error) {
+                console.warn('Could not migrate existing users:', error);
+            }
+        }
+
+        const legacyActivity = localStorage.getItem(LEGACY_ACTIVITY_KEY);
+        if (localStorage.getItem(ACTIVITY_KEY) === null && legacyActivity !== null) {
+            try {
+                const history = JSON.parse(legacyActivity);
+                if (history && typeof history === 'object' && !Array.isArray(history)) {
+                    localStorage.setItem(ACTIVITY_KEY, legacyActivity);
+                    localStorage.removeItem(LEGACY_ACTIVITY_KEY);
+                }
+            } catch (error) {
+                console.warn('Could not migrate existing activity history:', error);
+            }
+        }
+    }
+    migrateStorage();
+
     // API integration point: replace localStorage.getItem with GET /users.
     function load() {
         try {
@@ -59,7 +97,6 @@
         }
     }
     // Activity is stored separately so existing user records remain compatible.
-    const ACTIVITY_KEY = KEY + '-activity';
     let activityHistory = {};
     try {
         activityHistory = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '{}');
@@ -128,20 +165,41 @@
         setBadge($('.role-badge', tr), label(user.role, []), user.role === 'admin' ? 'bg-blue' : user.role === 'editor' ? 'bg-purple' : user.role === 'viewer' ? 'bg-beige' : 'bg-grey');
         const statusBadge = $('.status-badge', tr);
         statusBadge.className = `badge status-badge ${user.status === 'active' ? 'bg-green' : user.status === 'suspended' ? 'bg-red' : user.status === 'pending' ? 'bg-beige' : 'bg-purple'}`;
-        $('.status-text', tr).textContent = label(user.status, []);
+        $('.status-text', tr).textContent = statusLabel(user.status);
         $('.created-date', tr).textContent = dateLabel(user.createdDate);
         $('[data-row-action="toggle"]', tr).textContent = user.status === 'active' ? 'Deactivate user' : 'Activate user';
         return tr;
     }
     function pageWindow(total) {
-        const set = new Set([1, total, state.page - 1, state.page, state.page + 1, 2]);
-        const pages = [...set].filter(n => n >= 1 && n <= total).sort((a, b) => a - b);
-        const result = [];
-        pages.forEach((p, i) => {
-            if (i && p - pages[i - 1] > 1)
-                result.push('...'); result.push(p);
-        });
-        return result;
+        // Match the sliding window shown in the reference recording.
+        // Keep five consecutive pages at either edge and three around
+        // the active page in the middle, with first/last page shortcuts.
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+        let start;
+        let end;
+        if (state.page <= 3) {
+            start = 1;
+            end = 5;
+        } else if (state.page >= total - 2) {
+            start = total - 4;
+            end = total;
+        } else {
+            start = state.page - 1;
+            end = state.page + 1;
+        }
+
+        const pages = [];
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push('...');
+        }
+        for (let page = start; page <= end; page++) pages.push(page);
+        if (end < total) {
+            if (end < total - 1) pages.push('...');
+            pages.push(total);
+        }
+        return pages;
     }
     // Save the original pagination icons before rebuilding any buttons.
     // The HTML's SVGs are reused; no replacement icon design is introduced.
@@ -241,6 +299,9 @@
         if (checkAll) {
             checkAll.checked = rowCheckboxes.length > 0 && selectedOnPage === rowCheckboxes.length;
             checkAll.indeterminate = selectedOnPage > 0 && selectedOnPage < rowCheckboxes.length;
+            // CSS shows ::before for partial selection and ::after for full selection.
+            checkAll.classList.toggle('selection-partial', checkAll.indeterminate);
+            checkAll.classList.toggle('selection-all', checkAll.checked);
         }
 
         const count = state.selected.size;
@@ -566,7 +627,7 @@
                 }
                 if (previousUser.status !== data.status) {
                     recordActivity(state.editId, 'Status changed',
-                        'Status changed from ' + label(previousUser.status, []) + ' to ' + label(data.status, []) + '.');
+                        'Status changed from ' + statusLabel(previousUser.status) + ' to ' + statusLabel(data.status) + '.');
                 }
             }
             else {
@@ -602,8 +663,8 @@
                 title = count === 1 ? 'User Already Active' : 'Users Already Active';
                 description = `${subject} ${count === 1 ? 'is' : 'are'} already active. Select ${count === 1 ? 'a user' : 'users'} with a different status to activate.`;
             } else if (action === 'deactivate' && selectedUsers.every(user => user.status === 'suspended')) {
-                title = count === 1 ? 'User Already Suspended' : 'Users Already Suspended';
-                description = `${subject} ${count === 1 ? 'is' : 'are'} already suspended. Select ${count === 1 ? 'a user' : 'users'} who is not suspended to deactivate.`;
+                title = count === 1 ? 'User Already Deactivated' : 'Users Already Deactivated';
+                description = `${subject} ${count === 1 ? 'is' : 'are'} already deactivated. Select ${count === 1 ? 'a user' : 'users'} who is not deactivated to deactivate.`;
             } else {
                 title = 'No Eligible Users';
                 description = `None of the selected users can be ${ACTIONS[action].past}. Review their current statuses and try again.`;
@@ -656,7 +717,7 @@
                 persist(users.map(u => set.has(u.id) ? { ...u, status: action === 'activate' ? 'active' : 'suspended' } : u));
                 ids.forEach(id => recordActivity(id,
                     action === 'activate' ? 'User activated' : 'User deactivated',
-                    action === 'activate' ? 'The user account was activated.' : 'The user account was suspended.'));
+                    action === 'activate' ? 'The user account was activated.' : 'The user account was deactivated.'));
             }
             ids.forEach(id => state.selected.delete(id));
             if (state.detailId && !getUser(state.detailId))
@@ -687,7 +748,7 @@
         const statusColor = u.status === 'active' ? 'bg-green' : u.status === 'suspended' ? 'bg-red' : u.status === 'pending' ? 'bg-beige' : 'bg-purple';
         setBadge(badges[0], label(u.department, departments), deptColor);
         setBadge(badges[1], label(u.role, []), roleColor);
-        setBadge(badges[2], label(u.status, []), statusColor);
+        setBadge(badges[2], statusLabel(u.status), statusColor);
         // Keep the original sidebar activity item HTML, icons and CSS classes.
         const activityList = $('.recent-activity-list', root);
         if (!activityList) return;

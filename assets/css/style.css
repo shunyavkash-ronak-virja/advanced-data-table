@@ -469,7 +469,8 @@
   transition: all 0.3s ease-in-out;
 }
 
-.datatable-checkbox:checked {
+.datatable-checkbox:checked,
+.check-all-checkbox.selection-partial {
   background-color: var(--bluish-purple);
   border-color: var(--bluish-purple);
 }
@@ -484,8 +485,14 @@
   transition: all 0.3s ease-in-out;
 }
 
-.check-all-checkbox::before {
+.check-all-checkbox.selection-partial::before {
   content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus preview-icon"><path d="M5 12h14"/></svg>');
+  height: 80%;
+  aspect-ratio: 1;
+}
+
+.check-all-checkbox.selection-all::after {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check preview-icon"><path d="M20 6 9 17l-5-5"/></svg>');
   height: 80%;
   aspect-ratio: 1;
 }
@@ -494,7 +501,9 @@
   content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check preview-icon"><path d="M20 6 9 17l-5-5"/></svg>');
 }
 
-.datatable-checkbox:checked::before {
+.datatable-checkbox:checked::before,
+.check-all-checkbox.selection-partial::before,
+.datatable-checkbox:checked::after {
   opacity: 1;
   visibility: visible;
   transform: scale(1);
