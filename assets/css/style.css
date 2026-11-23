@@ -457,9 +457,6 @@
   width: 22px;
   aspect-ratio: 1;
   appearance: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
   border: 1px solid var(--cloud-break-200);
   border-radius: 4px;
@@ -475,26 +472,24 @@
   border-color: var(--bluish-purple);
 }
 
-.datatable-checkbox::before {
-  height: 80%;
-  aspect-ratio: 1;
+.datatable-checkbox::before,
+.datatable-checkbox:checked::after {
+  width: 66%;
   position: absolute;
+  top: 50%;
+  left: 50%;
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.4);
+  transform: scale(0.4) translate(-50%, -50%);
   transition: all 0.3s ease-in-out;
 }
 
 .check-all-checkbox.selection-partial::before {
   content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus preview-icon"><path d="M5 12h14"/></svg>');
-  height: 80%;
-  aspect-ratio: 1;
 }
 
 .check-all-checkbox.selection-all::after {
   content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check preview-icon"><path d="M20 6 9 17l-5-5"/></svg>');
-  height: 80%;
-  aspect-ratio: 1;
 }
 
 .user-select-checkbox::before {
@@ -506,7 +501,7 @@
 .datatable-checkbox:checked::after {
   opacity: 1;
   visibility: visible;
-  transform: scale(1);
+  transform: scale(1) translate(-50%, -50%);
 }
 
 .datatable-shorting-icon {
